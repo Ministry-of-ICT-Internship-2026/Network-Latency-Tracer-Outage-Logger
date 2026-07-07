@@ -44,13 +44,10 @@ def main():
     print("-" * 50)
 
     while True:
-                # Ping the host
         latency = ping_host(HOST)
 
-        # Create a monitoring record
         record = create_record(HOST, latency)
 
-        # Display the monitoring record
         print("-" * 50)
         print(f"Time    : {record['timestamp']}")
         print(f"Host    : {record['host']}")
