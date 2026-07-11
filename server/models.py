@@ -1,11 +1,3 @@
-"""
-Data models for the network monitoring module.
-
-PingResult is the atomic unit produced by the ping engine for a single probe.
-HostStatus aggregates a rolling window of PingResults into the derived
-metrics (loss rate, avg RTT, jitter, consecutive failures) that the outage
-logger and any reporting layer will actually consume.
-"""
 from dataclasses import dataclass
 from datetime import datetime
 from collections import deque
@@ -21,15 +13,20 @@ class PingResult:
     rtt_ms: Optional[float]
     error_type: Optional[str]  # None | "timeout" | "unreachable" | "permission_denied"
 
+@dataclass
+class OutageEvent:
+    """
+    Represents a completed network outage.
+    """
+
+    host: str
+    start_time: datetime
+    end_time: datetime
+    duration_seconds: float
+    reason: str = "Consecutive ping failures"
 
 class HostStatus:
-    """
-    Rolling-window status for a single host.
 
-    Deliberately keeps the outage-detection threshold (consecutive_failures
-    >= outage_threshold) separate from the ping engine itself, so that logic
-    can change later without touching probe/send code.
-    """
 
     def __init__(self, host: str, window_size: int = 10, outage_threshold: int = 3):
         self.host = host
