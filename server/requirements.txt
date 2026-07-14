@@ -1,1 +1,6 @@
 icmplib>=3.0.4
+streamlit
+pandas
+plotly
+ping3
+matplotlib
