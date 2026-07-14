@@ -24,13 +24,10 @@ This project is a Python-based application that monitors network latency, detect
 
 NetworkLatencyTracer/
 │
+├── server
 ├── app.py
-├── monitor.py
-├── outage.py
-├── database.py
 ├── analytics.py
 ├── reports.py
-├── config.py
 
 ## Team
 
