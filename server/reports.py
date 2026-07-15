@@ -1,9 +1,8 @@
 import csv
-import sqlite3
 from pathlib import Path
-from typing import Dict, List
-from analytics import Analytics
 from datetime import datetime
+
+from analytics import Analytics
 
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet
@@ -21,7 +20,7 @@ class ReportGenerator:
 
     def __init__(
         self,
-        analytics,
+        analytics: Analytics,
         export_folder: str = "exports",
     ):
         self.analytics = analytics
@@ -42,7 +41,7 @@ class ReportGenerator:
         Export all latency logs to a CSV file.
         """
 
-        rows = self.database.get_all_pings()
+        rows = self.analytics.get_latency_logs()
 
         output_file = self.export_folder / filename
 
@@ -81,7 +80,7 @@ class ReportGenerator:
         Export all outage events to CSV.
         """
 
-        rows = self.database.get_all_outages()
+        rows = self.analytics.get_outage_logs()
 
         output_file = self.export_folder / filename
 
@@ -116,7 +115,9 @@ class ReportGenerator:
         Export calculated statistics to CSV.
         """
 
-        summary = self.analytics.overall_summary()
+        report = self.analytics.build_full_report()
+        summary = report["summary"]
+        
 
         output_file = self.export_folder / filename
 
@@ -137,246 +138,233 @@ class ReportGenerator:
 
         return output_file
 
-# --------------------------------------------------
-# PDF Report
-# --------------------------------------------------
-def export_pdf_report(
-    self,
-    filename: str = "network_report.pdf",
-    graph_folder: str = "graphs",
-) -> Path:
-    """
-    Generates a professional PDF report containing
-    summary statistics, outage information and graphs
-    if available.
-    """
+    # --------------------------------------------------
+    # PDF Report
+    # --------------------------------------------------
 
-    summary = self.analytics.overall_summary()
+    def export_pdf_report(
+        self,
+        filename: str = "network_report.pdf",
+        graph_folder: str = "graphs",
+    ) -> Path:
+        """
+        Generates a professional PDF report.
+        """
 
-    output_file = self.export_folder / filename
+        report = self.analytics.build_full_report()
 
-    document = SimpleDocTemplate(
-        str(output_file),
-        pagesize=None,
-    )
+        summary = report["summary"]
+        hosts = report["hosts"]
 
-    from reportlab.lib.pagesizes import A4
+        output_file = self.export_folder / filename
 
-    document.pagesize = A4
+        from reportlab.lib.pagesizes import A4
 
-    styles = getSampleStyleSheet()
-
-    story = []
-
- # --------------------------------------------------
- # Title
- # --------------------------------------------------
-
-    story.append(
-        Paragraph(
-            "<b><font size=20>"
-            "Network Latency Monitoring Report"
-            "</font></b>",
-            styles["Title"],
+        document = SimpleDocTemplate(
+            str(output_file),
+            pagesize=A4,
         )
-    )
-    story.append(
-         Paragraph(
-           f"Generated on: {datetime.now().strftime('%d %B %Y %H:%M')}",
-        styles["Normal"],
-    )
-)
 
-    story.append(Spacer(1, 0.3 * inch))
+        styles = getSampleStyleSheet()
+        story = []
 
-    story.append(
-        Paragraph(
-            "Automatically generated from the "
-            "Network Latency Tracer & Outage Logger.",
-            styles["Normal"],
-        )
-    )
-
-    story.append(Spacer(1, 0.4 * inch))
-
-# --------------------------------------------------
-# Summary Table
- # --------------------------------------------------
-
-    table_data = [
-
-        ["Metric", "Value"],
-
-        ["Total Checks", summary["total_checks"]],
-
-        ["Successful Checks", summary["successful_checks"]],
-
-        ["Failed Checks", summary["failed_checks"]],
-
-        ["Average Latency (ms)", summary["average_latency"]],
-
-        ["Minimum Latency (ms)", summary["minimum_latency"]],
-
-        ["Maximum Latency (ms)", summary["maximum_latency"]],
-
-        ["Uptime (%)", summary["uptime_percent"]],
-
-        ["Total Outages", summary["total_outages"]],
-
-        ["Total Downtime (seconds)", summary["total_downtime"]],
-
-        ["Longest Outage (seconds)", summary["longest_outage"]],
-    ]
-
-    table = Table(table_data)
-
-    table.setStyle(
-
-        TableStyle(
-
-            [
-
-                ("BACKGROUND", (0, 0), (-1, 0), colors.darkblue),
-
-                ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
-
-                ("GRID", (0, 0), (-1, -1), 1, colors.grey),
-
-                ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
-
-                ("ALIGN", (0, 0), (-1, -1), "CENTER"),
-
-                ("BOTTOMPADDING", (0, 0), (-1, 0), 12),
-
-                ("BACKGROUND", (0, 1), (-1, -1), colors.beige),
-
-            ]
-        )
-    )
-
-    story.append(table)
-
-    story.append(Spacer(1, 0.4 * inch))
-
-    # --------------------------------------------------
-    # Graphs
-    # --------------------------------------------------
-
-    graph_folder = Path(graph_folder)
-
-    graph_files = [
-
-        "latency.png",
-
-        "packet_loss.png",
-
-        "uptime.png",
-
-        "outages.png",
-
-    ]
-
-    for graph in graph_files:
-
-        graph_path = graph_folder / graph
-
-        if graph_path.exists():
-
-            story.append(
-                Paragraph(
-                    f"<b>{graph.replace('.png','').replace('_',' ').title()}</b>",
-                    styles["Heading2"],
-                )
-            )
-
-            story.append(
-                Image(
-                    str(graph_path),
-                    width=6.5 * inch,
-                    height=3.5 * inch,
-                )
-            )
-
-            story.append(Spacer(1, 0.25 * inch))
-
-    # --------------------------------------------------
-    # Outage Details
-    # --------------------------------------------------
-
-    outages = self.database.get_all_outages()
-
-    if outages:
+        # --------------------------------------------------
+        # Title
+        # --------------------------------------------------
 
         story.append(
             Paragraph(
-                "<b>Recorded Outages</b>",
+                "<b><font size=20>Network Latency Monitoring Report</font></b>",
+                styles["Title"],
+            )
+        )
+
+        story.append(
+            Paragraph(
+                f"Generated on: {datetime.now():%d %B %Y %H:%M}",
+                styles["Normal"],
+            )
+        )
+
+        story.append(Spacer(1, 0.2 * inch))
+
+        story.append(
+            Paragraph(
+                "Automatically generated from the Network Latency Tracer & Outage Logger.",
+                styles["Normal"],
+            )
+        )
+
+        story.append(Spacer(1, 0.4 * inch))
+
+        # --------------------------------------------------
+        # Executive Summary
+        # --------------------------------------------------
+
+        story.append(
+            Paragraph(
+                "Executive Summary",
                 styles["Heading1"],
             )
         )
 
-        outage_table = [
+        story.append(Spacer(1, 0.2 * inch))
 
-            [
-                "Host",
-                "Start",
-                "End",
-                "Duration (s)",
-            ]
-        ]
-
-        for outage in outages:
-
-            outage_table.append(
-
-                [
-
-                    outage["host"],
-
-                    outage["start_time"],
-
-                    outage["end_time"],
-
-                    round(outage["duration_seconds"], 2),
-
-                ]
-
+        story.append(
+             Paragraph(
+                f"<b>Monitoring Period:</b> {summary.get('monitoring_period', 'N/A')}",
+                 styles["Normal"],
             )
-
-        t = Table(outage_table)
-
-        t.setStyle(
-
-            TableStyle(
-
-                [
-
-                    ("BACKGROUND", (0, 0), (-1, 0), colors.darkgreen),
-
-                    ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
-
-                    ("GRID", (0, 0), (-1, -1), 1, colors.black),
-
-                    ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
-
-                    ("ALIGN", (0, 0), (-1, -1), "CENTER"),
-
-                ]
-
-            )
-
         )
 
-        story.append(t)
+        story.append(
+            Paragraph(
+                 f"<b>Hosts Monitored:</b> {summary.get('hosts_monitored', 'N/A')}",
+                 styles["Normal"],
+            )
+        )
 
-    document.build(story)
+        story.append(Spacer(1, 0.2 * inch))
 
-    return output_file
-    # --------------------------------------------------
-    # Cleanup
-    # --------------------------------------------------
+        table_data = [
+             ["Metric", "Value"],
+             ["Total Ping Checks", summary["total_checks"]],
+             ["Successful Pings", summary["successful_checks"]],
+             ["Failed Pings", summary["failed_checks"]],
+             ["Average Latency (ms)", summary["average_latency"]],
+             ["Minimum Latency (ms)", summary["minimum_latency"]],
+             ["Maximum Latency (ms)", summary["maximum_latency"]],
+             ["Network Uptime (%)", summary["uptime_percent"]],
+             ["Number of Outages", summary["total_outages"]],
+        ]
 
-    def close(self) -> None:
-        """
-        Close database connection.
-        """
-        self.connection.close()
+        table = Table(table_data)
+
+        table.setStyle(
+            TableStyle(
+                [
+                    ("BACKGROUND", (0, 0), (-1, 0), colors.darkblue),
+                    ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+                    ("GRID", (0, 0), (-1, -1), 1, colors.grey),
+                    ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                    ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+                    ("BOTTOMPADDING", (0, 0), (-1, 0), 12),
+                    ("BACKGROUND", (0, 1), (-1, -1), colors.beige),
+                ]
+            )
+        )
+
+        story.append(table)
+        story.append(Spacer(1, 0.4 * inch))
+
+        story.append(
+             Paragraph(
+                 "Performance Graphs",
+                 styles["Heading1"],
+             )
+        )
+
+        story.append(Spacer(1, 0.2 * inch))
+
+        # --------------------------------------------------
+        # Graphs
+        # --------------------------------------------------
+
+        graph_folder = Path(graph_folder)
+
+        graph_files = [
+            "latency.png",
+            "packet_loss.png",
+            "uptime.png",
+            "outages.png",
+        ]
+
+        for graph in graph_files:
+
+            graph_path = graph_folder / graph
+
+            if graph_path.exists():
+
+                story.append(
+                    Paragraph(
+                        graph.replace(".png", "").replace("_", " ").title(),
+                        styles["Heading2"],
+                    )
+                )
+
+                story.append(
+                    Image(
+                        str(graph_path),
+                        width=6.5 * inch,
+                        height=3.5 * inch,
+                    )
+                )
+
+                story.append(Spacer(1, 0.25 * inch))
+
+        # --------------------------------------------------
+        # Outage Details
+        # --------------------------------------------------
+                story.append(
+                    Paragraph(
+                        "Outage History",
+                        styles["Heading1"],
+                    )
+                )
+
+                story.append(Spacer(1, 0.2 * inch))
+
+        outages = []
+
+        for host in hosts.values():
+            outages.extend(host["outages"])
+
+        if outages:
+
+            story.append(
+                Paragraph(
+                    "Recorded Outages",
+                    styles["Heading1"],
+                )
+            )
+
+            outage_table = [
+                ["Host", "Start Time", "End Time", "Duration (Seconds)"]
+            ]
+
+            for outage in outages:
+                outage_table.append([
+                    outage["host"],
+                    outage["start_time"],
+                    outage["end_time"],
+                    round(outage["duration_seconds"], 2),
+                ])
+
+            t = Table(outage_table)
+
+            t.setStyle(
+                TableStyle(
+                    [
+                        ("BACKGROUND", (0, 0), (-1, 0), colors.darkgreen),
+                        ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+                        ("GRID", (0, 0), (-1, -1), 1, colors.black),
+                        ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                        ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+                    ]
+                )
+            )
+
+            story.append(t)
+
+            story.append(Spacer(1, 0.4 * inch))
+
+            story.append(
+                Paragraph(
+                  "<i>End of Report</i>",
+                  styles["Normal"],
+                )
+            )
+
+        document.build(story)
+
+        return output_file
