@@ -90,7 +90,7 @@ class MonitoringAnalytics:
             raise FileNotFoundError(f"Database not found at: {db_path}")
         self.db_path = db_path
         self.outage_threshold = outage_threshold
-        self.connection = sqlite3.connect(db_path)
+        self.connection = sqlite3.connect(db_path, check_same_thread=False)
         self.connection.row_factory = sqlite3.Row
 
     def close(self) -> None:
@@ -144,6 +144,31 @@ class MonitoringAnalytics:
             "error_breakdown": fleet_errors,
             "outage_log": outage_log,
         }
+    
+    def get_latency_logs(self):
+        cursor = self.connection.cursor()
+
+        cursor.execute("""
+            SELECT *
+            FROM latency_logs
+            ORDER BY timestamp
+        """)
+
+        return cursor.fetchall()
+
+        return cursor.fetchall()
+
+
+    def get_outage_logs(self):
+        cursor = self.connection.cursor()
+
+        cursor.execute("""
+            SELECT *
+            FROM outage_logs
+            ORDER BY start_time
+        """)
+
+        return cursor.fetchall()
 
     # ------------------------------------------------------------------
     # Internals
@@ -262,8 +287,12 @@ class MonitoringAnalytics:
         if outages:
             durations = [o["duration_seconds"] for o in outages]
             report.total_downtime_seconds = round(sum(durations), 1)
-            report.mttr_seconds = round(sum(durations) / len(durations), 1)
             report.longest_outage_seconds = round(max(durations), 1)
+
+            completed = [o for o in outages if not o.get("ongoing")]
+            if completed:
+                completed_durations = [o["duration_seconds"] for o in completed]
+                report.mttr_seconds = round(sum(completed_durations) / len(completed_durations), 1)
             if len(outages) > 1:
                 gaps = [
                     (
@@ -323,6 +352,22 @@ class MonitoringAnalytics:
                     in_outage = True
 
         currently_down = in_outage
+        if in_outage:
+            # Host is still down as of the last log entry - record the
+            # in-progress outage so it shows up in outage history/tables
+            # even though it hasn't recovered yet.
+            now = datetime.now(timezone.utc)
+            outages.append(
+                {
+                    "host": None,
+                    "start_time": outage_start,
+                    "end_time": None,
+                    "ongoing": True,
+                    "duration_seconds": round(
+                        (now - _parse_ts(outage_start)).total_seconds(), 1
+                    ),
+                }
+            )
         return outages, consecutive, currently_down
 
     def _bucket_latency(self, rows: List[sqlite3.Row], bucket_seconds: int) -> List[dict]:

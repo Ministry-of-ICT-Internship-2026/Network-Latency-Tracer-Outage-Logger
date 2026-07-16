@@ -2,7 +2,7 @@ import csv
 from pathlib import Path
 from datetime import datetime
 
-from analytics import Analytics
+from analytics import MonitoringAnalytics
 
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet
@@ -19,9 +19,9 @@ from reportlab.platypus import (
 class ReportGenerator:
 
     def __init__(
-        self,
-        analytics: Analytics,
-        export_folder: str = "exports",
+       self,
+       analytics: MonitoringAnalytics,
+       export_folder="exports",
     ):
         self.analytics = analytics
         self.export_folder = Path(export_folder)
@@ -155,6 +155,7 @@ class ReportGenerator:
 
         summary = report["summary"]
         hosts = report["hosts"]
+        period = report["period"]
 
         output_file = self.export_folder / filename
 
@@ -211,10 +212,10 @@ class ReportGenerator:
         story.append(Spacer(1, 0.2 * inch))
 
         story.append(
-             Paragraph(
-                f"<b>Monitoring Period:</b> {summary.get('monitoring_period', 'N/A')}",
-                 styles["Normal"],
-            )
+           Paragraph(
+                f"<b>Monitoring Period:</b> {period['start']} to {period['end']}",
+                styles["Normal"],
+             )
         )
 
         story.append(
@@ -228,14 +229,15 @@ class ReportGenerator:
 
         table_data = [
              ["Metric", "Value"],
-             ["Total Ping Checks", summary["total_checks"]],
-             ["Successful Pings", summary["successful_checks"]],
-             ["Failed Pings", summary["failed_checks"]],
-             ["Average Latency (ms)", summary["average_latency"]],
-             ["Minimum Latency (ms)", summary["minimum_latency"]],
-             ["Maximum Latency (ms)", summary["maximum_latency"]],
-             ["Network Uptime (%)", summary["uptime_percent"]],
-             ["Number of Outages", summary["total_outages"]],
+             ["Hosts Monitored", summary["hosts_monitored"]],
+             ["Total Ping Checks", summary["total_pings"]],
+             ["Failed Pings", summary["total_failed_pings"]],
+             ["Fleet Average Latency (ms)", summary["fleet_avg_latency_ms"]],
+             ["Fleet Uptime (%)", summary["fleet_uptime_pct"]],
+             ["Total Outages", summary["total_outages"]],
+             ["Total Downtime", summary["total_downtime_human"]],
+             ["Worst Host", summary["worst_host"]],
+             ["Best Host", summary["best_host"]],
         ]
 
         table = Table(table_data)
@@ -305,14 +307,14 @@ class ReportGenerator:
         # --------------------------------------------------
         # Outage Details
         # --------------------------------------------------
-                story.append(
-                    Paragraph(
-                        "Outage History",
-                        styles["Heading1"],
-                    )
-                )
+        story.append(
+            Paragraph(
+                "Outage History",
+                styles["Heading1"],
+            )
+        )
 
-                story.append(Spacer(1, 0.2 * inch))
+        story.append(Spacer(1, 0.2 * inch))
 
         outages = []
 
@@ -336,7 +338,7 @@ class ReportGenerator:
                 outage_table.append([
                     outage["host"],
                     outage["start_time"],
-                    outage["end_time"],
+                    outage["end_time"] or "Ongoing",
                     round(outage["duration_seconds"], 2),
                 ])
 
@@ -358,12 +360,12 @@ class ReportGenerator:
 
             story.append(Spacer(1, 0.4 * inch))
 
-            story.append(
-                Paragraph(
-                  "<i>End of Report</i>",
-                  styles["Normal"],
-                )
-            )
+        story.append(
+             Paragraph(
+                "<i>End of Report</i>",
+                styles["Normal"],
+             )
+         )
 
         document.build(story)
 
