@@ -1,82 +1,198 @@
 import asyncio
 import logging
 
-from config import MonitorConfig
-from models import HostStatus, PingResult
-from monitor import NetworkMonitor
-from outage import OutageManager
-from database import DatabaseManager
+from server.config import (
+    MonitorConfig,
+    load_targets_from_database
+)
+
+from server.models import (
+    HostStatus,
+    PingResult
+)
+
+from server.monitor import NetworkMonitor
+from server.outage import OutageManager
+from server.database import DatabaseManager
+
 
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
 )
 
+
+
 database = DatabaseManager()
+
 outage_manager = OutageManager()
 
 
-def on_result(result: PingResult, status: HostStatus) -> None:
-    # Save every ping result
+
+# --------------------------------------------------
+# Handle every ping result
+# --------------------------------------------------
+
+def on_result(
+    result: PingResult,
+    status: HostStatus
+):
+
+    # Save ping
     database.save_ping(result)
 
-    # Check whether an outage has completed
-    outage = outage_manager.process(result, status)
+
+
+    # Check outage
+    outage = outage_manager.process(
+        result,
+        status
+    )
+
 
     if outage:
-        database.save_outage(outage)
 
-        print("\n========== OUTAGE RECORDED ==========")
-        print(f"Host: {outage.host}")
-        print(f"Started: {outage.start_time}")
-        print(f"Ended: {outage.end_time}")
-        print(f"Duration: {outage.duration_seconds:.2f} seconds")
-        print("=====================================\n")
+        database.save_outage(
+            outage
+        )
 
-    outcome = (
-        f"{result.rtt_ms:.1f} ms"
-        if result.success
-        else f"FAILED ({result.error_type})"
-    )
+
+        logging.warning(
+            "OUTAGE RECORDED | %s | %.2fs",
+            outage.host,
+            outage.duration_seconds
+        )
+
+
+
+    # Console output
+
+    if result.success:
+
+        message = (
+            f"{result.rtt_ms:.2f} ms"
+        )
+
+    else:
+
+        message = (
+            f"FAILED ({result.error_type})"
+        )
+
+
 
     print(
         f"[{result.host}] "
         f"seq={result.sequence} "
-        f"{outcome} | "
+        f"{message} | "
         f"loss={status.loss_rate:.1f}% "
-        f"avg_rtt={status.avg_rtt} "
+        f"avg={status.avg_rtt} "
         f"outage={status.is_outage}"
     )
 
 
+
+
+# --------------------------------------------------
+# Start monitoring
+# --------------------------------------------------
+
 async def main():
+
+    targets = load_targets_from_database()
+
+
+
+    if not targets:
+
+        logging.warning(
+            "No hosts found in database."
+        )
+
+        return
+
+
+
     config = MonitorConfig(
-        hosts=[
-            "8.8.8.8",
-            "1.1.1.1",
-            "192.0.2.1",
-        ],
-        interval_seconds=3.0,
-        timeout_seconds=2.0,
+
+        targets=targets,
+
+        interval_seconds=3,
+
+        timeout_seconds=2,
+
         window_size=10,
-        outage_threshold=3,
+
+        outage_threshold=3
+
     )
 
-    monitor = NetworkMonitor(config, on_result=on_result)
 
-    logging.info("Starting network monitor for %d hosts.", len(config.hosts))
+
+    monitor = NetworkMonitor(
+
+        config,
+
+        on_result
+
+    )
+
+
+
+    logging.info(
+        "Starting monitor for %d hosts",
+        len(targets)
+    )
+
+
+
+    for target in targets:
+
+        logging.info(
+            "Monitoring %s (%s)",
+            target.name,
+            target.host
+        )
+
+
 
     try:
+
         await monitor.start()
 
-    finally:
-        monitor.stop()
-        database.close()
-        logging.info("Network monitoring stopped.")
 
+
+    except asyncio.CancelledError:
+
+        logging.info(
+            "Monitor stopped"
+        )
+
+
+
+    finally:
+
+        monitor.stop()
+
+        database.close()
+
+
+
+# --------------------------------------------------
+# Program entry
+# --------------------------------------------------
 
 if __name__ == "__main__":
+
     try:
-        asyncio.run(main())
+
+        asyncio.run(
+            main()
+        )
+
+
     except KeyboardInterrupt:
-        print("\nProgram terminated by user.")
+
+        print(
+            "\nShutdown requested."
+        )

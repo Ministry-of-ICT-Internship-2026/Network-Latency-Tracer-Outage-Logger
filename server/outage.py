@@ -2,9 +2,13 @@ import logging
 from datetime import datetime
 from typing import Dict, Optional
 
-from models import HostStatus, PingResult, OutageEvent
+from server.models import HostStatus, PingResult, OutageEvent
 
 logger = logging.getLogger(__name__)
+
+from server.config import config
+
+threshold = config.outage_threshold
 
 
 class OutageManager:

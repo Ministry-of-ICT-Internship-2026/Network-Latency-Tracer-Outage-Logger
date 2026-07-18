@@ -16,7 +16,7 @@ from typing import Optional
 
 from icmplib import async_ping, ICMPLibError, SocketPermissionError
 
-from models import PingResult
+from server.models import PingResult
 
 logger = logging.getLogger(__name__)
 

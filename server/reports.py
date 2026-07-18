@@ -2,7 +2,7 @@ import csv
 from pathlib import Path
 from datetime import datetime
 
-from analytics import MonitoringAnalytics
+from server.analytics import MonitoringAnalytics
 
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet

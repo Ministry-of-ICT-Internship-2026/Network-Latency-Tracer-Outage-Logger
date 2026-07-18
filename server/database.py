@@ -2,21 +2,24 @@ import sqlite3
 from pathlib import Path
 from typing import List
 
-from models import PingResult, OutageEvent
+from server.models import PingResult, OutageEvent
 
 
 class DatabaseManager:
  
-    def __init__(self, db_path: str = "database/latency.db"):
+    def __init__(self, db_path: str = "server/database/latency.db"):
         Path(db_path).parent.mkdir(parents=True, exist_ok=True)
 
-        self.connection = sqlite3.connect(db_path)
+        self.connection = sqlite3.connect(
+            db_path,
+            check_same_thread=False
+        )
         self.connection.row_factory = sqlite3.Row
 
         self.create_tables()
 
     def create_tables(self) -> None:
-       
+
         cursor = self.connection.cursor()
 
         cursor.execute("""
@@ -31,6 +34,7 @@ class DatabaseManager:
         )
         """)
 
+
         cursor.execute("""
         CREATE TABLE IF NOT EXISTS outage_logs (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -42,6 +46,18 @@ class DatabaseManager:
         )
         """)
 
+
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS hosts(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            hostname TEXT NOT NULL,
+            ip_address TEXT NOT NULL UNIQUE,
+            enabled INTEGER DEFAULT 1,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+        """)
+
+
         cursor.execute("""
         CREATE INDEX IF NOT EXISTS idx_latency_host
         ON latency_logs(host)
@@ -51,6 +67,7 @@ class DatabaseManager:
         CREATE INDEX IF NOT EXISTS idx_outage_host
         ON outage_logs(host)
         """)
+
 
         self.connection.commit()
 
@@ -154,7 +171,75 @@ class DatabaseManager:
         """, (host,))
 
         return cursor.fetchone()
+    
 
+    def add_host(
+        self,
+        hostname,
+        ip_address,
+    ):
+
+        try:
+            self.connection.execute(
+                """
+                INSERT INTO hosts
+                (
+                    hostname,
+                    ip_address
+                )
+                VALUES (?, ?)
+                """,
+                (
+                    hostname,
+                    ip_address,
+                )
+            )
+
+            self.connection.commit()
+
+        except sqlite3.IntegrityError:
+            raise Exception(
+                "Host already exists"
+            )
+        
+        self.connection.execute(
+        """
+        INSERT INTO hosts
+        (hostname, ip_address)
+        VALUES (?, ?)
+        """,
+        (
+            hostname,
+            ip_address
+        )
+    )
+
+        self.connection.commit()
+
+    def get_hosts(self):
+
+        cursor = self.connection.execute(
+        """
+        SELECT *
+        FROM hosts
+        WHERE enabled=1
+        """
+    )
+
+        return cursor.fetchall()
+
+    def delete_host(self, host_id):
+
+        self.connection.execute(
+        """
+        DELETE FROM hosts
+        WHERE id=?
+        """,
+        (host_id,)
+    )
+
+        self.connection.commit()
+    
     def clear_latency_logs(self) -> None:
       
         cursor = self.connection.cursor()

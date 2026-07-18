@@ -6,7 +6,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, List, Optional
-
+from server.database import DatabaseManager
 
 
 def _parse_ts(value: str) -> datetime:
@@ -34,6 +34,7 @@ def _percentile(sorted_values: List[float], pct: float) -> Optional[float]:
 @dataclass
 class HostReport:
     host: str
+    name: str
     total_pings: int = 0
     successful_pings: int = 0
     failed_pings: int = 0
@@ -85,7 +86,11 @@ class MonitoringAnalytics:
     Read-only: never mutates latency_logs / outage_logs.
     """
 
-    def __init__(self, db_path: str = "database/latency.db", outage_threshold: int = 3):
+    def __init__(
+    self,
+    db_path: str = "server/database/latency.db",
+    outage_threshold: int = 3,
+    ):
         if not Path(db_path).exists():
             raise FileNotFoundError(f"Database not found at: {db_path}")
         self.db_path = db_path
@@ -107,9 +112,42 @@ class MonitoringAnalytics:
     # ------------------------------------------------------------------
 
     def get_hosts(self) -> List[str]:
+        """
+        Returns all enabled hosts from the hosts table.
+        Hosts can appear even before they have monitoring data.
+        """
+
         cur = self.connection.cursor()
-        cur.execute("SELECT DISTINCT host FROM latency_logs ORDER BY host")
-        return [row["host"] for row in cur.fetchall()]
+
+        cur.execute("""
+        SELECT ip_address
+        FROM hosts
+        WHERE enabled = 1
+        ORDER BY hostname
+        """)
+
+        return [
+        row["ip_address"]
+        for row in cur.fetchall()
+        ]
+
+    def get_host_names(self) -> Dict[str, str]:
+        """
+        Loads friendly host names from the hosts table.
+        Maps IP address -> hostname.
+        """
+
+        cur = self.connection.cursor()
+
+        cur.execute("""
+            SELECT hostname, ip_address
+            FROM hosts
+        """)
+
+        return {
+        row["ip_address"]: row["hostname"]
+        for row in cur.fetchall()
+        }
 
     def build_full_report(self, bucket_seconds: int = 60) -> dict:
         """
@@ -124,7 +162,17 @@ class MonitoringAnalytics:
         }
         """
         hosts = self.get_hosts()
-        host_reports = {host: self._build_host_report(host, bucket_seconds) for host in hosts}
+
+        host_names = self.get_host_names()
+
+        host_reports = {
+            host: self._build_host_report(
+              host,
+              bucket_seconds,
+              host_names
+            )
+             for host in hosts
+        }
 
         period = self._get_period()
         summary = self._build_summary(host_reports, period)
@@ -207,7 +255,11 @@ class MonitoringAnalytics:
             key=lambda h: h.uptime_pct,
             default=None,
         )
-        currently_down = [h.host for h in host_reports.values() if h.currently_down]
+        currently_down = [
+             h.name
+             for h in host_reports.values()
+             if h.currently_down
+        ]
 
         return {
             "hosts_monitored": len(host_reports),
@@ -218,15 +270,20 @@ class MonitoringAnalytics:
             "total_outages": total_outages,
             "total_downtime_seconds": round(total_downtime, 1),
             "total_downtime_human": _human_duration(total_downtime),
-            "worst_host": worst_host.host if worst_host else None,
+            "worst_host": worst_host.name if worst_host else None,
             "worst_host_uptime_pct": worst_host.uptime_pct if worst_host else None,
-            "best_host": best_host.host if best_host else None,
+            "best_host": best_host.name if best_host else None,
             "best_host_uptime_pct": best_host.uptime_pct if best_host else None,
             "currently_down_hosts": currently_down,
             "monitoring_window_hours": period["duration_hours"],
         }
 
-    def _build_host_report(self, host: str, bucket_seconds: int) -> HostReport:
+    def _build_host_report(
+        self,
+        host: str,
+        bucket_seconds: int,
+        host_names: Dict[str, str]
+    ) -> HostReport:
         cur = self.connection.cursor()
         cur.execute(
             """
@@ -239,7 +296,10 @@ class MonitoringAnalytics:
         )
         rows = cur.fetchall()
 
-        report = HostReport(host=host)
+        report = HostReport(
+            host=host,
+            name=host_names.get(host, host)
+        )
         report.total_pings = len(rows)
         if not rows:
             return report
@@ -400,11 +460,16 @@ class MonitoringAnalytics:
         return out
 
     @staticmethod
-    def _host_report_to_dict(report: HostReport) -> dict:
+    def _host_report_to_dict(report):
+
         d = report.__dict__.copy()
-        # host field already carried on the report; strip duplicate outages->host None values
-        for o in d["outages"]:
-            o["host"] = report.host
+
+        d["display_name"] = report.name
+
+        for outage in d["outages"]:
+            outage["host"] = report.host
+            outage["display_name"] = report.name
+
         return d
 
 
@@ -431,6 +496,6 @@ if __name__ == "__main__":
     import json
     import sys
 
-    db = sys.argv[1] if len(sys.argv) > 1 else "database/latency.db"
+    db = sys.argv[1] if len(sys.argv) > 1 else "server/database/latency.db"
     with MonitoringAnalytics(db) as analytics:
         print(json.dumps(analytics.build_full_report(), indent=2, default=str))

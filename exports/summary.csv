@@ -1,0 +1,15 @@
+Metric,Value
+Hosts Monitored,3
+Total Pings,72
+Total Failed Pings,10
+Fleet Uptime Pct,66.67
+Fleet Avg Latency Ms,65.74
+Total Outages,1
+Total Downtime Seconds,486279.7
+Total Downtime Human,5d 15h 4m
+Worst Host,192.0.2.1
+Worst Host Uptime Pct,0.0
+Best Host,1.1.1.1
+Best Host Uptime Pct,100.0
+Currently Down Hosts,['192.0.2.1']
+Monitoring Window Hours,114.49

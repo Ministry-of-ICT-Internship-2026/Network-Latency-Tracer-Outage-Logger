@@ -1,14 +1,103 @@
 """
-Configuration for the network monitoring module.
-"""
-from dataclasses import dataclass
-from typing import List
+config.py
+---------
+Central configuration for the Network Latency Tracer & Outage Logger.
 
+All monitoring settings are managed here.
+"""
+
+from dataclasses import dataclass, field
+from pathlib import Path
+
+
+# ---------------------------------------------------------------
+# Targets
+# ---------------------------------------------------------------
+
+@dataclass
+class Target:
+
+    name: str
+    host: str
+
+
+
+# ---------------------------------------------------------------
+# Monitor Configuration
+# ---------------------------------------------------------------
 
 @dataclass
 class MonitorConfig:
-    hosts: List[str]
-    interval_seconds: float = 5.0    # time between probes, per host
-    timeout_seconds: float = 2.0     # per-probe timeout before counting as a failure
-    window_size: int = 10            # rolling window size for loss-rate / jitter stats
-    outage_threshold: int = 3        # consecutive failures before a host is flagged as an outage
+
+    # Targets loaded from database
+    targets: list[Target] = field(
+        default_factory=list
+    )
+
+
+    # Timing
+    interval_seconds: float = 5.0
+
+    timeout_seconds: float = 2.0
+
+
+    # Statistics
+    window_size: int = 10
+
+
+    # Outage detection
+    outage_threshold: int = 3
+
+
+    # Reliability thresholds
+    degraded_latency_ms: float = 150.0
+
+    major_outage_seconds: int = 300
+
+
+    # SLA
+    sla_target_percent: float = 99.5
+
+
+    # Database
+    database_path: Path = Path(
+        "server/database/latency.db"
+    )
+
+
+    # Dashboard
+    dashboard_refresh_seconds: int = 5
+
+
+
+config = MonitorConfig()
+
+
+
+def load_targets_from_database():
+
+    from server.database import DatabaseManager
+
+
+    db = DatabaseManager()
+
+
+    try:
+
+        hosts = db.get_hosts()
+
+
+        return [
+
+            Target(
+                host["hostname"],
+                host["ip_address"]
+            )
+
+            for host in hosts
+
+        ]
+
+    finally:
+
+        db.close()
