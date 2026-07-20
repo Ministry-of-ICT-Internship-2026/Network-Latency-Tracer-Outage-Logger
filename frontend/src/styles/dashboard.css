@@ -1,0 +1,409 @@
+/* =========================
+   Dashboard / Host Pages
+========================= */
+
+
+.dashboard-page,
+.host-page {
+
+    padding:24px;
+
+}
+
+
+
+/* =========================
+   Page Titles
+========================= */
+
+
+.dashboard-page h1,
+.host-page h1 {
+
+    margin-bottom:25px;
+
+}
+
+
+
+/* =========================
+   Summary Cards
+========================= */
+
+
+.summary-grid {
+
+    display:grid;
+
+    grid-template-columns:repeat(5, 1fr);
+
+    gap:18px;
+
+    margin-bottom:35px;
+
+}
+
+
+
+.summary-card {
+
+    background:white;
+
+    padding:20px;
+
+    border-radius:12px;
+
+    border:1px solid #e5e7eb;
+
+    box-shadow:0 2px 5px rgba(0,0,0,0.05);
+
+}
+
+
+
+.summary-card h3 {
+
+    margin:0 0 10px 0;
+
+    font-size:15px;
+
+    color:#6b7280;
+
+}
+
+
+
+.summary-card p {
+
+    margin:0;
+
+    font-size:24px;
+
+    font-weight:bold;
+
+}
+
+
+
+/* =========================
+   Host IP
+========================= */
+
+
+.host-ip {
+
+    color:#6b7280;
+
+    margin-bottom:25px;
+
+}
+
+
+
+/* =========================
+   Status Section
+========================= */
+
+
+.status-box {
+
+    background:white;
+
+    padding:18px;
+
+    border-radius:12px;
+
+    border:1px solid #e5e7eb;
+
+    margin-bottom:25px;
+
+}
+
+
+
+.status-down {
+
+    color:#dc2626;
+
+    font-weight:bold;
+
+}
+
+
+
+.status-ok {
+
+    color:#16a34a;
+
+    font-weight:bold;
+
+}
+
+
+
+/* =========================
+   Sections
+========================= */
+
+
+.dashboard-section {
+
+    background:white;
+
+    padding:20px;
+
+    border-radius:12px;
+
+    border:1px solid #e5e7eb;
+
+    margin-bottom:25px;
+
+}
+
+
+
+/* =========================
+   Charts
+========================= */
+
+
+.chart-card {
+
+    background:white;
+
+    padding:20px;
+
+    border-radius:12px;
+
+    border:1px solid #e5e7eb;
+
+    margin-bottom:25px;
+
+}
+
+
+
+.chart-card h2,
+.chart-card h3 {
+
+    margin-top:0;
+
+}
+
+
+
+/* Prevent charts becoming huge */
+
+.chart-card canvas {
+
+    max-height:350px;
+
+}
+
+
+
+/* =========================
+   Host Selector
+========================= */
+
+
+.host-selector {
+
+    margin-bottom:20px;
+
+}
+
+
+
+.host-selector select {
+
+    padding:10px 14px;
+
+    border-radius:8px;
+
+    border:1px solid #ccc;
+
+    background:white;
+
+    font-size:14px;
+
+}
+
+
+
+/* =========================
+   Tables
+========================= */
+
+
+.table-card {
+
+    background:white;
+
+    padding:20px;
+
+    border-radius:12px;
+
+    border:1px solid #e5e7eb;
+
+    overflow-x:auto;
+
+    margin-bottom:25px;
+
+}
+
+
+
+.table-card table {
+
+    width:100%;
+
+    border-collapse:collapse;
+
+}
+
+
+
+.table-card th {
+
+    text-align:left;
+
+    padding:12px;
+
+    border-bottom:2px solid #e5e7eb;
+
+}
+
+
+
+.table-card td {
+
+    padding:12px;
+
+    border-bottom:1px solid #f1f1f1;
+
+}
+
+
+
+.table-card tr:hover {
+
+    background:#f9fafb;
+
+}
+
+
+
+/* =========================
+   Outage Table
+========================= */
+
+
+.outage-table {
+
+    width:100%;
+
+    border-collapse:collapse;
+
+}
+
+
+
+.outage-table td:first-child {
+
+    font-weight:bold;
+
+    width:40%;
+
+}
+
+
+
+/* =========================
+   Buttons
+========================= */
+
+
+button {
+
+    padding:8px 14px;
+
+    border-radius:8px;
+
+    border:none;
+
+    cursor:pointer;
+
+}
+
+
+
+button:hover {
+
+    opacity:0.85;
+
+}
+
+
+
+/* =========================
+   Links
+========================= */
+
+
+a {
+
+    text-decoration:none;
+
+    color:#2563eb;
+
+}
+
+
+
+a:hover {
+
+    text-decoration:underline;
+
+}
+
+
+
+/* =========================
+   Responsive
+========================= */
+
+
+@media(max-width:1200px){
+
+
+    .summary-grid {
+
+        grid-template-columns:repeat(3,1fr);
+
+    }
+
+
+}
+
+
+
+@media(max-width:768px){
+
+
+    .summary-grid {
+
+        grid-template-columns:repeat(1,1fr);
+
+    }
+
+
+    .dashboard-page,
+    .host-page {
+
+        padding:15px;
+
+    }
+
+
+}

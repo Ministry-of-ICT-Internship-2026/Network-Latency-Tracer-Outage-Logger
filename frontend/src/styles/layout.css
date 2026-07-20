@@ -1,0 +1,200 @@
+/* ==========================================
+   Dashboard Layout
+========================================== */
+
+.dashboard-layout{
+
+    display:flex;
+
+    min-height:100vh;
+
+    background:#f5f7fb;
+
+}
+
+
+
+/* ==========================================
+   Main Content
+========================================== */
+
+.dashboard-main{
+
+    flex:1;
+
+    display:flex;
+
+    flex-direction:column;
+
+    min-width:0;
+
+}
+
+
+
+/* ==========================================
+   Page Content
+========================================== */
+
+.page-content{
+
+    flex:1;
+
+    padding:30px;
+
+    overflow-y:auto;
+
+}
+
+
+
+/* ==========================================
+   Navbar
+========================================== */
+
+.navbar{
+
+    height:70px;
+
+    background:white;
+
+    border-bottom:1px solid #e5e7eb;
+
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+
+    padding:0 30px;
+
+}
+
+
+
+/* ==========================================
+   Sidebar
+========================================== */
+
+.sidebar{
+
+    width:260px;
+
+    flex-shrink:0;
+
+    background:#1e293b;
+
+    color:white;
+
+
+    display:flex;
+
+    flex-direction:column;
+
+
+    padding:25px 20px;
+
+}
+
+
+
+.sidebar h2{
+
+    margin-bottom:40px;
+
+    font-size:24px;
+
+}
+
+
+
+/* Navigation */
+
+.sidebar a{
+
+    color:#cbd5e1;
+
+    text-decoration:none;
+
+
+    padding:14px 18px;
+
+    border-radius:10px;
+
+
+    margin-bottom:8px;
+
+
+    transition:.2s;
+
+}
+
+
+
+.sidebar a:hover{
+
+    background:#334155;
+
+    color:white;
+
+}
+
+
+
+.sidebar a.active{
+
+    background:#2563eb;
+
+    color:white;
+
+}
+
+
+
+/* ==========================================
+   Page Titles
+========================================== */
+
+.page-title{
+
+    margin-bottom:25px;
+
+}
+
+
+
+/* ==========================================
+   Responsive
+========================================== */
+
+@media(max-width:900px){
+
+
+    .dashboard-layout{
+
+        flex-direction:column;
+
+    }
+
+
+    .sidebar{
+
+        width:100%;
+
+        flex-direction:row;
+
+        overflow-x:auto;
+
+    }
+
+
+    .sidebar h2{
+
+        display:none;
+
+    }
+
+
+}

@@ -1,0 +1,208 @@
+/* ==========================================
+   Settings Page
+========================================== */
+
+
+.settings-page{
+
+    padding:24px;
+
+}
+
+
+
+/* ==========================================
+   Settings Cards
+========================================== */
+
+
+.settings-card{
+
+    background:white;
+
+    padding:25px;
+
+    margin-bottom:25px;
+
+    border-radius:12px;
+
+    border:1px solid #e5e7eb;
+
+    max-width:650px;
+
+}
+
+
+
+
+
+.settings-card h2,
+.settings-card h3{
+
+    margin-top:0;
+
+    margin-bottom:15px;
+
+}
+
+
+
+
+
+.settings-card p{
+
+    color:#6b7280;
+
+}
+
+
+
+
+
+/* ==========================================
+   Form Fields
+========================================== */
+
+
+.settings-card label{
+
+    display:block;
+
+    margin-top:15px;
+
+    margin-bottom:5px;
+
+    font-weight:500;
+
+}
+
+
+
+
+
+.settings-card input,
+.settings-card select{
+
+    width:100%;
+
+    padding:10px 12px;
+
+    border:1px solid #d1d5db;
+
+    border-radius:8px;
+
+    font-size:14px;
+
+}
+
+
+
+
+
+.settings-card input:focus,
+.settings-card select:focus{
+
+    outline:none;
+
+    border-color:#2563eb;
+
+}
+
+
+
+
+
+/* ==========================================
+   Buttons
+========================================== */
+
+
+.settings-card button{
+
+    margin-top:20px;
+
+    padding:10px 20px;
+
+    border:none;
+
+    border-radius:8px;
+
+    background:#2563eb;
+
+    color:white;
+
+    cursor:pointer;
+
+    font-size:15px;
+
+}
+
+
+
+
+
+.settings-card button:hover{
+
+    opacity:.9;
+
+}
+
+
+
+
+
+/* ==========================================
+   Toggle Settings
+========================================== */
+
+
+.setting-row{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    margin-top:15px;
+
+}
+
+
+
+
+
+.setting-row input[type="checkbox"]{
+
+    width:auto;
+
+}
+
+
+
+
+
+/* ==========================================
+   Responsive
+========================================== */
+
+
+@media(max-width:768px){
+
+
+    .settings-page{
+
+        padding:15px;
+
+    }
+
+
+
+    .settings-card{
+
+        max-width:100%;
+
+    }
+
+
+}

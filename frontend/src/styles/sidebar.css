@@ -1,0 +1,229 @@
+/* ==========================================
+   Sidebar
+========================================== */
+
+
+.sidebar{
+
+    width:260px;
+
+    min-height:100vh;
+
+    background:#1e293b;
+
+    color:white;
+
+    display:flex;
+
+    flex-direction:column;
+
+    padding:25px 20px;
+
+    box-sizing:border-box;
+
+    flex-shrink:0;
+
+}
+
+
+
+/* ==========================================
+   Logo
+========================================== */
+
+
+.sidebar-logo{
+
+    font-size:24px;
+
+    font-weight:bold;
+
+    margin-bottom:40px;
+
+}
+
+
+
+/* ==========================================
+   Navigation
+========================================== */
+
+
+.sidebar-nav{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:8px;
+
+}
+
+
+
+.sidebar-link{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:12px;
+
+
+    color:#cbd5e1;
+
+    text-decoration:none;
+
+
+    padding:14px 16px;
+
+    border-radius:10px;
+
+
+    transition:0.2s ease;
+
+    font-size:15px;
+
+}
+
+
+
+.sidebar-link:hover{
+
+    background:#334155;
+
+    color:white;
+
+}
+
+
+
+/* Active route */
+
+
+.sidebar-link.active{
+
+    background:#2563eb;
+
+    color:white;
+
+}
+
+
+
+/* ==========================================
+   Icons
+========================================== */
+
+
+.sidebar-icon{
+
+    font-size:18px;
+
+}
+
+
+
+/* ==========================================
+   Bottom Section
+========================================== */
+
+
+.sidebar-footer{
+
+    margin-top:auto;
+
+    padding-top:20px;
+
+    border-top:1px solid rgba(255,255,255,.1);
+
+}
+
+
+
+.sidebar-footer button{
+
+    width:100%;
+
+    padding:12px;
+
+    border:none;
+
+    border-radius:8px;
+
+    background:#334155;
+
+    color:white;
+
+    cursor:pointer;
+
+}
+
+
+
+.sidebar-footer button:hover{
+
+    background:#475569;
+
+}
+
+
+
+/* ==========================================
+   Mobile
+========================================== */
+
+
+@media(max-width:900px){
+
+
+    .sidebar{
+
+        width:100%;
+
+        min-height:auto;
+
+        flex-direction:row;
+
+        align-items:center;
+
+        overflow-x:auto;
+
+        padding:15px;
+
+    }
+
+
+
+    .sidebar-logo{
+
+        display:none;
+
+    }
+
+
+
+    .sidebar-nav{
+
+        flex-direction:row;
+
+    }
+
+
+
+    .sidebar-link{
+
+        white-space:nowrap;
+
+    }
+
+
+
+    .sidebar-footer{
+
+        display:none;
+
+    }
+
+
+}
