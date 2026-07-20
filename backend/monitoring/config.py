@@ -61,7 +61,7 @@ class MonitorConfig:
 
     # Database
     database_path: Path = Path(
-        "server/database/latency.db"
+        "database/latency.db"
     )
 
 
@@ -78,20 +78,18 @@ def load_targets_from_database():
 
     from monitoring.database import DatabaseManager
 
-
     db = DatabaseManager()
-
 
     try:
 
-        hosts = db.get_hosts()
-
+        hosts = db.get_enabled_hosts()
+        print("Hosts from database:", hosts)
 
         return [
 
             Target(
-                host["hostname"],
-                host["ip_address"]
+                name=host["hostname"],
+                host=host["ip_address"]
             )
 
             for host in hosts

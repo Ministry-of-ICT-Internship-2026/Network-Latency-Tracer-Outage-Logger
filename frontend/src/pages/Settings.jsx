@@ -73,7 +73,7 @@ export default function Settings(){
                 <p>
                     <strong>Location:</strong>
                     {" "}
-                    server/database/latency.db
+                    database/latency.db
                 </p>
 
 

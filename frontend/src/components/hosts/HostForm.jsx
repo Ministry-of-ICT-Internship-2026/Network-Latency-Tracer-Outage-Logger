@@ -8,36 +8,22 @@ export default function HostForm({ onAdd }){
 
     const [ip,setIp] = useState("");
 
+    const [error,setError] = useState("");
 
-
-    function submit(e){
-
-
-        e.preventDefault();
+    const [loading,setLoading] = useState(false);
 
 
 
-        if(!hostname || !ip){
-
-            return;
-
-        }
 
 
-
-        onAdd({
-
-            hostname,
-
-            ip_address: ip
-
-        });
+    function validateIP(address){
 
 
+        const regex =
+        /^(\d{1,3}\.){3}\d{1,3}$/;
 
-        setHostname("");
 
-        setIp("");
+        return regex.test(address);
 
     }
 
@@ -45,62 +31,231 @@ export default function HostForm({ onAdd }){
 
 
 
+
+    async function submit(e){
+
+
+        e.preventDefault();
+
+
+
+        setError("");
+
+
+
+
+        if(!hostname.trim() || !ip.trim()){
+
+
+            setError(
+                "Hostname and IP address are required"
+            );
+
+            return;
+
+        }
+
+
+
+
+
+        if(!validateIP(ip)){
+
+
+            setError(
+                "Enter a valid IPv4 address"
+            );
+
+            return;
+
+        }
+
+
+
+
+
+        try{
+
+
+            setLoading(true);
+
+
+
+            await onAdd({
+
+                hostname: hostname.trim(),
+
+                ip_address: ip.trim()
+
+            });
+
+
+
+            setHostname("");
+
+            setIp("");
+
+
+
+        }
+
+
+        catch(err){
+
+
+            setError(
+                err.message
+            );
+
+
+        }
+
+
+        finally{
+
+
+            setLoading(false);
+
+
+        }
+
+
+    }
+
+
+
+
+
+
     return (
 
+
         <form
+
             onSubmit={submit}
+
             className="host-form"
+
         >
 
 
+
             <h3>
-                Add Host
+                Add New Host
             </h3>
 
 
 
+
+
+            {
+                error && (
+
+                    <p className="form-error">
+
+                        {error}
+
+                    </p>
+
+                )
+            }
+
+
+
+
+
+
+
             <input
+
 
                 type="text"
 
-                placeholder="Hostname"
+
+                placeholder="Host name e.g Google DNS"
+
 
                 value={hostname}
 
+
                 onChange={
-                    e => setHostname(e.target.value)
+
+                    e =>
+                    setHostname(
+                        e.target.value
+                    )
+
                 }
 
+
             />
+
+
+
 
 
 
             <input
 
+
                 type="text"
 
-                placeholder="IP Address"
+
+                placeholder="IP address e.g 8.8.8.8"
+
 
                 value={ip}
 
+
                 onChange={
-                    e => setIp(e.target.value)
+
+                    e =>
+                    setIp(
+                        e.target.value
+                    )
+
                 }
 
+
             />
+
+
+
+
 
 
 
             <button
+
                 type="submit"
+
+                disabled={loading}
+
             >
 
-                Add Host
+
+                {
+                    loading
+
+                    ?
+
+                    "Adding..."
+
+                    :
+
+                    "Add Host"
+
+                }
+
 
             </button>
 
 
+
+
+
         </form>
+
 
     );
 

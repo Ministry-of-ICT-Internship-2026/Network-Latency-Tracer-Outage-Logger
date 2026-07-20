@@ -65,6 +65,13 @@ export function getAnalytics(){
 
 }
 
+export function getFullAnalytics(){
+
+    return api
+        .get("/analytics/full")
+        .then(res => res.data);
+
+}
 
 
 // -------------------------

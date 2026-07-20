@@ -1,4 +1,5 @@
 import useFleet from "../hooks/useFleet";
+import useAnalytics from "../hooks/useAnalytics";
 
 import FleetTable from "../components/hosts/FleetTable";
 import HostForm from "../components/hosts/HostForm";
@@ -27,19 +28,50 @@ export default function Fleet(){
 
 
 
-    if(loading){
+    const {
 
-        return <h2>Loading fleet...</h2>;
+        analytics,
+
+        loading: analyticsLoading,
+
+        error: analyticsError
+
+    } = useAnalytics();
+
+
+
+
+    if(loading || analyticsLoading){
+
+        return (
+
+            <div className="loading">
+
+                Loading fleet...
+
+            </div>
+
+        );
 
     }
 
 
 
-    if(error){
 
-        return <h2>{error}</h2>;
+    if(error || analyticsError){
+
+        return (
+
+            <div className="empty-state">
+
+                {error || analyticsError}
+
+            </div>
+
+        );
 
     }
+
 
 
 
@@ -48,10 +80,18 @@ export default function Fleet(){
         <div className="host-page">
 
 
-            <h1>
-                Fleet Monitoring
-            </h1>
+            <div className="page-header">
 
+                <h1>
+                    Fleet Monitoring
+                </h1>
+
+
+                <p>
+                    Monitor and manage your network hosts
+                </p>
+
+            </div>
 
 
 
@@ -63,18 +103,17 @@ export default function Fleet(){
 
 
 
-
-
             <FleetTable
 
                 hosts={hosts}
+
+                analytics={analytics}
 
                 onDelete={deleteHost}
 
                 onToggle={toggleHost}
 
             />
-
 
 
         </div>

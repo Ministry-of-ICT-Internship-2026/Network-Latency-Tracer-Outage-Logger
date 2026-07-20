@@ -95,7 +95,6 @@ class NetworkMonitor:
     # -------------------------------------
     # Check database for new hosts
     # -------------------------------------
-
     async def refresh_hosts(self):
 
         while self._running:
@@ -104,33 +103,46 @@ class NetworkMonitor:
 
                 database_targets = load_targets_from_database()
 
+                active_hosts = {
+                    target.host
+                    for target in database_targets
+                }
 
+
+                # Add new hosts
                 for target in database_targets:
 
-
                     if target.host not in self.statuses:
-
 
                         logger.info(
                             "New host detected: %s",
                             target.host
                         )
 
-
-                        # Add host to internal tracking
                         self._add_host(target)
 
-
-                        # Keep target list updated
                         self.targets.append(target)
 
-
-                        # Start latency monitoring immediately
                         asyncio.create_task(
                             self._monitor_host(
                                 target.host
                             )
                         )
+
+
+                # Remove disabled hosts
+                for host in list(self.statuses.keys()):
+
+                    if host not in active_hosts:
+
+                        logger.info(
+                            "Stopping monitoring for %s",
+                            host
+                        )
+
+                        del self.statuses[host]
+
+                        del self._sequence_counters[host]
 
 
             except Exception as e:
@@ -142,9 +154,6 @@ class NetworkMonitor:
 
 
             await asyncio.sleep(5)
-
-
-
     # -------------------------------------
     # Monitor individual host
     # -------------------------------------
@@ -154,9 +163,12 @@ class NetworkMonitor:
         host: str
     ):
 
+        logger.info(
+            "Monitoring started for %s",
+            host
+        )
 
         status = self.statuses[host]
-
 
         while self._running:
 
@@ -173,6 +185,13 @@ class NetworkMonitor:
             result = await self.engine.probe(
                 host,
                 sequence
+            )
+
+            logger.info(
+                "%s -> success=%s latency=%s",
+                host,
+                result.success,
+                result.rtt_ms
             )
 
 

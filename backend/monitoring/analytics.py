@@ -496,6 +496,6 @@ if __name__ == "__main__":
     import json
     import sys
 
-    db = sys.argv[1] if len(sys.argv) > 1 else "server/database/latency.db"
+    db = sys.argv[1] if len(sys.argv) > 1 else "database/latency.db"
     with MonitoringAnalytics(db) as analytics:
         print(json.dumps(analytics.build_full_report(), indent=2, default=str))

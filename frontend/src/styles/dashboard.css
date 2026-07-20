@@ -1,26 +1,33 @@
 /* =========================
-   Dashboard / Host Pages
+   Global Dashboard Style
 ========================= */
 
 
 .dashboard-page,
 .host-page {
 
-    padding:24px;
+    padding:30px;
+
+    background:#f8fafc;
+
+    min-height:100vh;
+
+    color:#111827;
 
 }
 
 
 
-/* =========================
-   Page Titles
-========================= */
-
-
 .dashboard-page h1,
 .host-page h1 {
 
-    margin-bottom:25px;
+    margin-bottom:30px;
+
+    font-size:32px;
+
+    font-weight:700;
+
+    color:#111827;
 
 }
 
@@ -35,9 +42,9 @@
 
     display:grid;
 
-    grid-template-columns:repeat(5, 1fr);
+    grid-template-columns:repeat(5,1fr);
 
-    gap:18px;
+    gap:20px;
 
     margin-bottom:35px;
 
@@ -47,15 +54,32 @@
 
 .summary-card {
 
+
     background:white;
 
-    padding:20px;
+    padding:22px;
 
-    border-radius:12px;
+    border-radius:16px;
 
     border:1px solid #e5e7eb;
 
-    box-shadow:0 2px 5px rgba(0,0,0,0.05);
+    box-shadow:
+        0 4px 12px rgba(0,0,0,0.05);
+
+    transition:0.25s;
+
+}
+
+
+
+.summary-card:hover {
+
+
+    transform:translateY(-4px);
+
+
+    box-shadow:
+        0 8px 20px rgba(0,0,0,0.08);
 
 }
 
@@ -63,11 +87,16 @@
 
 .summary-card h3 {
 
-    margin:0 0 10px 0;
 
-    font-size:15px;
+    margin-bottom:12px;
 
-    color:#6b7280;
+    font-size:14px;
+
+    text-transform:uppercase;
+
+    letter-spacing:.5px;
+
+    color:#64748b;
 
 }
 
@@ -75,47 +104,59 @@
 
 .summary-card p {
 
-    margin:0;
 
-    font-size:24px;
+    font-size:28px;
 
-    font-weight:bold;
+    font-weight:700;
 
-}
-
-
-
-/* =========================
-   Host IP
-========================= */
-
-
-.host-ip {
-
-    color:#6b7280;
-
-    margin-bottom:25px;
+    color:#0f172a;
 
 }
 
 
 
 /* =========================
-   Status Section
+   Status
 ========================= */
 
 
 .status-box {
 
+
     background:white;
 
-    padding:18px;
+    padding:22px;
 
-    border-radius:12px;
+    border-radius:16px;
 
     border:1px solid #e5e7eb;
 
-    margin-bottom:25px;
+    margin-bottom:30px;
+
+}
+
+
+
+.status-box h2 {
+
+
+    margin-top:0;
+
+}
+
+
+
+.status-down,
+.status-ok {
+
+
+    display:inline-block;
+
+    padding:10px 16px;
+
+    border-radius:20px;
+
+    font-weight:600;
 
 }
 
@@ -123,9 +164,10 @@
 
 .status-down {
 
-    color:#dc2626;
 
-    font-weight:bold;
+    background:#fee2e2;
+
+    color:#b91c1c;
 
 }
 
@@ -133,11 +175,13 @@
 
 .status-ok {
 
-    color:#16a34a;
 
-    font-weight:bold;
+    background:#dcfce7;
+
+    color:#15803d;
 
 }
+
 
 
 
@@ -148,55 +192,16 @@
 
 .dashboard-section {
 
-    background:white;
-
-    padding:20px;
-
-    border-radius:12px;
-
-    border:1px solid #e5e7eb;
-
-    margin-bottom:25px;
-
-}
-
-
-
-/* =========================
-   Charts
-========================= */
-
-
-.chart-card {
 
     background:white;
 
-    padding:20px;
+    padding:25px;
 
-    border-radius:12px;
+    border-radius:16px;
 
     border:1px solid #e5e7eb;
 
-    margin-bottom:25px;
-
-}
-
-
-
-.chart-card h2,
-.chart-card h3 {
-
-    margin-top:0;
-
-}
-
-
-
-/* Prevent charts becoming huge */
-
-.chart-card canvas {
-
-    max-height:350px;
+    margin-bottom:30px;
 
 }
 
@@ -209,7 +214,8 @@
 
 .host-selector {
 
-    margin-bottom:20px;
+
+    margin-bottom:25px;
 
 }
 
@@ -217,15 +223,78 @@
 
 .host-selector select {
 
-    padding:10px 14px;
 
-    border-radius:8px;
+    width:250px;
 
-    border:1px solid #ccc;
+    padding:12px 16px;
+
+    border-radius:10px;
+
+    border:1px solid #cbd5e1;
 
     background:white;
 
-    font-size:14px;
+    font-size:15px;
+
+    cursor:pointer;
+
+}
+
+
+
+.host-selector select:hover {
+
+
+    border-color:#2563eb;
+
+}
+
+
+
+/* =========================
+   Charts
+========================= */
+
+
+.chart-card {
+
+
+    background:#ffffff;
+
+
+    padding:22px;
+
+
+    border-radius:16px;
+
+
+    border:1px solid #e5e7eb;
+
+
+    margin-bottom:25px;
+
+
+}
+
+
+
+.chart-card h3 {
+
+
+    margin-top:0;
+
+    margin-bottom:20px;
+
+    color:#334155;
+
+}
+
+
+
+.chart-card canvas {
+
+
+    max-height:350px;
 
 }
 
@@ -238,17 +307,21 @@
 
 .table-card {
 
+
     background:white;
 
-    padding:20px;
 
-    border-radius:12px;
+    padding:25px;
+
+
+    border-radius:16px;
+
 
     border:1px solid #e5e7eb;
 
+
     overflow-x:auto;
 
-    margin-bottom:25px;
 
 }
 
@@ -256,9 +329,12 @@
 
 .table-card table {
 
+
     width:100%;
 
+
     border-collapse:collapse;
+
 
 }
 
@@ -266,11 +342,21 @@
 
 .table-card th {
 
+
+    background:#f8fafc;
+
+
+    padding:14px;
+
+
     text-align:left;
 
-    padding:12px;
 
-    border-bottom:2px solid #e5e7eb;
+    color:#475569;
+
+
+    font-size:14px;
+
 
 }
 
@@ -278,9 +364,22 @@
 
 .table-card td {
 
-    padding:12px;
 
-    border-bottom:1px solid #f1f1f1;
+    padding:14px;
+
+
+    border-bottom:1px solid #e5e7eb;
+
+
+}
+
+
+
+.table-card tr {
+
+
+    transition:.2s;
+
 
 }
 
@@ -288,32 +387,9 @@
 
 .table-card tr:hover {
 
-    background:#f9fafb;
 
-}
+    background:#f8fafc;
 
-
-
-/* =========================
-   Outage Table
-========================= */
-
-
-.outage-table {
-
-    width:100%;
-
-    border-collapse:collapse;
-
-}
-
-
-
-.outage-table td:first-child {
-
-    font-weight:bold;
-
-    width:40%;
 
 }
 
@@ -326,13 +402,30 @@
 
 button {
 
-    padding:8px 14px;
 
-    border-radius:8px;
+    padding:10px 18px;
+
+
+    border-radius:10px;
+
 
     border:none;
 
+
+    background:#2563eb;
+
+
+    color:white;
+
+
+    font-weight:600;
+
+
     cursor:pointer;
+
+
+    transition:.2s;
+
 
 }
 
@@ -340,9 +433,37 @@ button {
 
 button:hover {
 
-    opacity:0.85;
+
+    background:#1d4ed8;
+
+
+    transform:translateY(-1px);
+
 
 }
+
+
+
+/* =========================
+   Host Status Buttons
+========================= */
+
+
+button.danger {
+
+
+    background:#dc2626;
+
+}
+
+
+button.success {
+
+
+    background:#16a34a;
+
+}
+
 
 
 
@@ -353,9 +474,12 @@ button:hover {
 
 a {
 
-    text-decoration:none;
 
     color:#2563eb;
+
+
+    font-weight:500;
+
 
 }
 
@@ -363,9 +487,83 @@ a {
 
 a:hover {
 
-    text-decoration:underline;
+
+    color:#1d4ed8;
+
 
 }
+
+
+
+/* =========================
+   Scrollbars
+========================= */
+
+
+::-webkit-scrollbar {
+
+
+    width:8px;
+
+
+}
+
+
+
+::-webkit-scrollbar-thumb {
+
+
+    background:#cbd5e1;
+
+
+    border-radius:10px;
+
+
+}
+
+
+
+
+/* =========================
+   Animations
+========================= */
+
+
+.chart-card,
+.summary-card,
+.table-card {
+
+
+    animation:fadeIn .3s ease;
+
+
+}
+
+
+
+@keyframes fadeIn {
+
+
+    from {
+
+        opacity:0;
+
+        transform:translateY(10px);
+
+    }
+
+
+    to {
+
+        opacity:1;
+
+        transform:translateY(0);
+
+    }
+
+
+}
+
 
 
 
@@ -379,7 +577,9 @@ a:hover {
 
     .summary-grid {
 
+
         grid-template-columns:repeat(3,1fr);
+
 
     }
 
@@ -391,17 +591,32 @@ a:hover {
 @media(max-width:768px){
 
 
-    .summary-grid {
+    .dashboard-page,
+    .host-page {
 
-        grid-template-columns:repeat(1,1fr);
+
+        padding:15px;
+
 
     }
 
 
-    .dashboard-page,
-    .host-page {
 
-        padding:15px;
+    .summary-grid {
+
+
+        grid-template-columns:1fr;
+
+
+    }
+
+
+
+    .host-selector select {
+
+
+        width:100%;
+
 
     }
 
