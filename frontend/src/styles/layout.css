@@ -1,0 +1,480 @@
+/* ==========================================
+   Dashboard Layout
+========================================== */
+
+.dashboard-layout {
+
+    display:flex;
+
+    min-height:100vh;
+
+    background:#f8fafc;
+
+    color:#1e293b;
+
+}
+
+
+
+/* ==========================================
+   Main Content
+========================================== */
+
+
+.dashboard-main {
+
+    flex:1;
+
+    display:flex;
+
+    flex-direction:column;
+
+    min-width:0;
+
+}
+
+
+
+
+
+/* ==========================================
+   Page Content
+========================================== */
+
+
+.page-content {
+
+    flex:1;
+
+    padding:32px;
+
+    overflow-y:auto;
+
+}
+
+
+
+
+
+/* ==========================================
+   Navbar
+========================================== */
+
+
+.navbar {
+
+
+    height:70px;
+
+
+    background:white;
+
+
+    border-bottom:
+
+        1px solid #e2e8f0;
+
+
+    display:flex;
+
+
+    align-items:center;
+
+
+    justify-content:space-between;
+
+
+    padding:0 32px;
+
+
+    position:sticky;
+
+
+    top:0;
+
+
+    z-index:10;
+
+
+    box-shadow:
+
+        0 2px 8px rgba(0,0,0,0.04);
+
+
+}
+
+
+
+.navbar h1 {
+
+
+    font-size:20px;
+
+    font-weight:700;
+
+    color:#0f172a;
+
+}
+
+
+
+
+
+
+/* ==========================================
+   Sidebar
+========================================== */
+
+
+.sidebar {
+
+
+    width:260px;
+
+
+    flex-shrink:0;
+
+
+    background:#0f172a;
+
+
+    color:white;
+
+
+    display:flex;
+
+
+    flex-direction:column;
+
+
+    padding:28px 20px;
+
+
+    box-shadow:
+
+        4px 0 12px rgba(0,0,0,0.08);
+
+
+}
+
+
+
+
+
+.sidebar h2 {
+
+
+    margin-bottom:40px;
+
+
+    font-size:24px;
+
+
+    font-weight:700;
+
+
+    letter-spacing:.5px;
+
+
+}
+
+
+
+
+
+
+
+/* ==========================================
+   Navigation Links
+========================================== */
+
+
+.sidebar a {
+
+
+    color:#94a3b8;
+
+
+    text-decoration:none;
+
+
+    padding:14px 18px;
+
+
+    border-radius:12px;
+
+
+    margin-bottom:8px;
+
+
+    display:flex;
+
+
+    align-items:center;
+
+
+    gap:12px;
+
+
+    font-weight:500;
+
+
+    transition:.25s;
+
+
+}
+
+
+
+
+
+.sidebar a:hover {
+
+
+    background:#1e293b;
+
+
+    color:white;
+
+
+    transform:translateX(4px);
+
+
+}
+
+
+
+
+
+.sidebar a.active {
+
+
+    background:#2563eb;
+
+
+    color:white;
+
+
+    box-shadow:
+
+        0 4px 12px rgba(37,99,235,.35);
+
+
+}
+
+
+
+
+
+
+
+/* ==========================================
+   Page Titles
+========================================== */
+
+
+.page-title {
+
+
+    margin-bottom:30px;
+
+
+    font-size:28px;
+
+
+    font-weight:700;
+
+
+    color:#0f172a;
+
+
+}
+
+
+
+
+
+
+
+/* ==========================================
+   Scrollbar
+========================================== */
+
+
+.page-content::-webkit-scrollbar {
+
+
+    width:8px;
+
+
+}
+
+
+
+.page-content::-webkit-scrollbar-thumb {
+
+
+    background:#cbd5e1;
+
+
+    border-radius:20px;
+
+
+}
+
+
+
+
+
+
+
+/* ==========================================
+   Cards Global Style
+========================================== */
+
+
+.card {
+
+
+    background:white;
+
+
+    border-radius:16px;
+
+
+    border:1px solid #e2e8f0;
+
+
+    padding:24px;
+
+
+    box-shadow:
+
+
+        0 4px 12px rgba(0,0,0,.05);
+
+
+}
+
+
+
+
+
+
+
+/* ==========================================
+   Responsive
+========================================== */
+
+
+@media(max-width:900px){
+
+
+
+    .dashboard-layout {
+
+
+        flex-direction:column;
+
+
+    }
+
+
+
+
+    .sidebar {
+
+
+        width:100%;
+
+
+        flex-direction:row;
+
+
+        align-items:center;
+
+
+        gap:10px;
+
+
+        overflow-x:auto;
+
+
+        padding:15px;
+
+
+    }
+
+
+
+
+
+    .sidebar h2 {
+
+
+        display:none;
+
+
+    }
+
+
+
+
+
+    .sidebar a {
+
+
+        white-space:nowrap;
+
+
+        margin:0;
+
+
+    }
+
+
+
+
+
+    .page-content {
+
+
+        padding:20px;
+
+
+    }
+
+
+
+}
+
+
+
+
+
+@media(max-width:600px){
+
+
+
+    .navbar {
+
+
+        padding:0 15px;
+
+
+    }
+
+
+
+
+    .page-title {
+
+
+        font-size:22px;
+
+
+    }
+
+
+
+}

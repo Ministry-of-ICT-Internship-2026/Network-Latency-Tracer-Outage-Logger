@@ -1,0 +1,597 @@
+/* =========================
+   Host Page
+========================= */
+
+.host-page {
+
+    padding:32px;
+
+    background:#f8fafc;
+
+    min-height:100vh;
+
+}
+
+
+
+.host-page h1 {
+
+    margin-bottom:30px;
+
+    color:#111827;
+
+    font-size:30px;
+
+    font-weight:700;
+
+}
+
+
+
+/* =========================
+   Add Host Form
+========================= */
+
+
+.host-form {
+
+    background:white;
+
+    padding:28px;
+
+    border-radius:18px;
+
+    border:1px solid #e5e7eb;
+
+    margin-bottom:30px;
+
+    display:flex;
+
+    gap:16px;
+
+    align-items:center;
+
+    flex-wrap:wrap;
+
+    box-shadow:
+    0 6px 20px rgba(0,0,0,.05);
+
+}
+
+
+
+.host-form h3 {
+
+    width:100%;
+
+    margin:0 0 15px;
+
+    font-size:20px;
+
+}
+
+
+
+.host-form input {
+
+
+    flex:1;
+
+    min-width:220px;
+
+    padding:13px 15px;
+
+    border-radius:12px;
+
+    border:1px solid #cbd5e1;
+
+    font-size:14px;
+
+}
+
+
+
+.host-form input:focus {
+
+
+    outline:none;
+
+    border-color:#2563eb;
+
+    box-shadow:
+    0 0 0 4px rgba(37,99,235,.12);
+
+}
+
+
+
+
+.host-form button {
+
+
+    padding:13px 24px;
+
+    border:none;
+
+    border-radius:12px;
+
+    background:#2563eb;
+
+    color:white;
+
+    font-weight:600;
+
+    cursor:pointer;
+
+}
+
+
+
+.host-form button:hover {
+
+    background:#1d4ed8;
+
+}
+
+
+
+/* =========================
+   Search + Table Container
+========================= */
+
+
+.host-table {
+
+    background:white;
+
+    padding:28px;
+
+    border-radius:18px;
+
+    border:1px solid #e5e7eb;
+
+    overflow-x:auto;
+
+    box-shadow:
+    0 6px 20px rgba(0,0,0,.05);
+
+}
+
+
+
+
+.host-search {
+
+    width:320px;
+
+    max-width:100%;
+
+    padding:12px 15px;
+
+    margin-bottom:25px;
+
+    border-radius:12px;
+
+    border:1px solid #cbd5e1;
+
+}
+
+
+
+.host-search:focus {
+
+    outline:none;
+
+    border-color:#2563eb;
+
+}
+
+
+
+/* =========================
+   Table
+========================= */
+
+
+.host-table table {
+
+    width:100%;
+
+    border-collapse:collapse;
+
+}
+
+
+
+.host-table th {
+
+
+    padding:15px;
+
+    text-align:left;
+
+    background:#f8fafc;
+
+    color:#475569;
+
+    font-size:13px;
+
+    text-transform:uppercase;
+
+    border-bottom:2px solid #e5e7eb;
+
+}
+
+
+
+.host-table td {
+
+
+    padding:15px;
+
+    border-bottom:1px solid #f1f5f9;
+
+    color:#334155;
+
+}
+
+
+
+.host-table tbody tr:hover {
+
+    background:#f8fafc;
+
+}
+
+
+
+
+.host-table a {
+
+    color:#2563eb;
+
+    font-weight:600;
+
+    text-decoration:none;
+
+}
+
+
+
+.host-table a:hover {
+
+    text-decoration:underline;
+
+}
+
+
+
+/* =========================
+   Buttons
+========================= */
+
+
+.host-table button {
+
+
+    padding:8px 15px;
+
+    margin-right:8px;
+
+    border:none;
+
+    border-radius:8px;
+
+    cursor:pointer;
+
+    font-weight:600;
+
+    font-size:13px;
+
+}
+
+
+
+
+.host-table button:first-child {
+
+
+    background:#2563eb;
+
+    color:white;
+
+}
+
+
+
+
+.host-table button:first-child:hover {
+
+
+    background:#1d4ed8;
+
+}
+
+
+
+
+.host-table button:last-child {
+
+
+    background:#ef4444;
+
+    color:white;
+
+}
+
+
+
+.host-table button:last-child:hover {
+
+
+    background:#dc2626;
+
+}
+
+
+
+/* =========================
+   Status Badges
+========================= */
+
+
+.status-enabled {
+
+
+    display:inline-block;
+
+    background:#dcfce7;
+
+    color:#166534;
+
+    padding:6px 12px;
+
+    border-radius:999px;
+
+    font-size:13px;
+
+    font-weight:600;
+
+}
+
+
+
+.status-disabled {
+
+
+    display:inline-block;
+
+    background:#fee2e2;
+
+    color:#991b1b;
+
+    padding:6px 12px;
+
+    border-radius:999px;
+
+    font-size:13px;
+
+    font-weight:600;
+
+}
+
+
+
+/* Analytics Status */
+
+
+.status-unknown {
+
+
+    display:inline-block;
+
+    background:#fef3c7;
+
+    color:#92400e;
+
+    padding:6px 12px;
+
+    border-radius:999px;
+
+    font-size:13px;
+
+    font-weight:600;
+
+}
+
+
+
+/* =========================
+   Latency
+========================= */
+
+
+.latency-good,
+.latency-warning,
+.latency-high {
+
+
+    display:inline-block;
+
+    padding:5px 10px;
+
+    border-radius:999px;
+
+    font-size:13px;
+
+    font-weight:600;
+
+}
+
+
+
+.latency-good {
+
+    background:#dcfce7;
+
+    color:#166534;
+
+}
+
+
+
+.latency-warning {
+
+    background:#fef3c7;
+
+    color:#92400e;
+
+}
+
+
+
+.latency-high {
+
+    background:#fee2e2;
+
+    color:#991b1b;
+
+}
+
+
+
+/* =========================
+   Empty State
+========================= */
+
+
+.empty-hosts {
+
+    text-align:center;
+
+    padding:50px;
+
+    color:#64748b;
+
+}
+
+
+
+/* =========================
+   Responsive
+========================= */
+
+
+@media(max-width:900px){
+
+
+    .host-page {
+
+        padding:20px;
+
+    }
+
+
+
+    .host-form {
+
+        flex-direction:column;
+
+        align-items:stretch;
+
+    }
+
+
+
+    .host-form input,
+    .host-form button {
+
+        width:100%;
+
+    }
+
+
+
+    .host-table table {
+
+        min-width:900px;
+
+    }
+
+
+}
+
+/* =========================
+   Host Actions
+========================= */
+
+
+.host-actions {
+
+    display:flex;
+
+    gap:12px;
+
+    align-items:center;
+
+    white-space:nowrap;
+
+}
+
+
+
+.host-actions button {
+
+    padding:8px 16px;
+
+    border-radius:8px;
+
+    border:none;
+
+    cursor:pointer;
+
+    font-weight:600;
+
+    font-size:13px;
+
+}
+
+
+
+/* Toggle */
+
+.toggle-btn {
+
+    background:#2563eb;
+
+    color:white;
+
+}
+
+
+
+.toggle-btn:hover {
+
+    background:#1d4ed8;
+
+}
+
+
+
+/* Delete */
+
+.delete-btn {
+
+    background:#ef4444;
+
+    color:white;
+
+}
+
+
+
+.delete-btn:hover {
+
+    background:#dc2626;
+
+}

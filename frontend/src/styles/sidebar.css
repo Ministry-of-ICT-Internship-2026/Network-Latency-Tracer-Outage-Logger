@@ -1,0 +1,432 @@
+/* ==========================================
+   Sidebar
+========================================== */
+
+
+.sidebar {
+
+    width:260px;
+
+    min-height:100vh;
+
+    background:#0f172a;
+
+    color:white;
+
+    display:flex;
+
+    flex-direction:column;
+
+    padding:28px 20px;
+
+    box-sizing:border-box;
+
+    flex-shrink:0;
+
+    box-shadow:
+
+        4px 0 15px rgba(0,0,0,.08);
+
+}
+
+
+
+
+
+/* ==========================================
+   Logo
+========================================== */
+
+
+.sidebar-logo {
+
+
+    font-size:25px;
+
+
+    font-weight:800;
+
+
+    letter-spacing:.5px;
+
+
+    margin-bottom:45px;
+
+
+    color:white;
+
+
+}
+
+
+
+
+
+.sidebar-logo span {
+
+
+    color:#2563eb;
+
+
+}
+
+
+
+
+
+
+
+/* ==========================================
+   Navigation
+========================================== */
+
+
+.sidebar-nav {
+
+
+    display:flex;
+
+
+    flex-direction:column;
+
+
+    gap:10px;
+
+
+}
+
+
+
+
+
+.sidebar-link {
+
+
+    display:flex;
+
+
+    align-items:center;
+
+
+    gap:14px;
+
+
+    color:#94a3b8;
+
+
+    text-decoration:none;
+
+
+    padding:14px 16px;
+
+
+    border-radius:12px;
+
+
+    font-size:15px;
+
+
+    font-weight:500;
+
+
+    transition:.25s;
+
+
+    position:relative;
+
+
+}
+
+
+
+
+
+.sidebar-link:hover {
+
+
+    background:#1e293b;
+
+
+    color:white;
+
+
+    transform:translateX(4px);
+
+
+}
+
+
+
+
+
+
+
+/* Active route */
+
+
+.sidebar-link.active {
+
+
+    background:#2563eb;
+
+
+    color:white;
+
+
+    box-shadow:
+
+
+        0 6px 15px rgba(37,99,235,.35);
+
+
+}
+
+
+
+
+
+
+.sidebar-link.active::before {
+
+
+    content:"";
+
+
+    position:absolute;
+
+
+    left:-20px;
+
+
+    width:4px;
+
+
+    height:35px;
+
+
+    background:white;
+
+
+    border-radius:5px;
+
+
+}
+
+
+
+
+
+
+
+
+/* ==========================================
+   Icons
+========================================== */
+
+
+.sidebar-icon {
+
+
+    font-size:20px;
+
+
+    display:flex;
+
+
+    align-items:center;
+
+
+}
+
+
+
+
+
+
+
+
+/* ==========================================
+   Footer
+========================================== */
+
+
+.sidebar-footer {
+
+
+    margin-top:auto;
+
+
+    padding-top:20px;
+
+
+    border-top:
+
+
+        1px solid rgba(255,255,255,.1);
+
+
+}
+
+
+
+
+
+
+.sidebar-footer button {
+
+
+    width:100%;
+
+
+    padding:12px 15px;
+
+
+    border:none;
+
+
+    border-radius:10px;
+
+
+    background:#1e293b;
+
+
+    color:#cbd5e1;
+
+
+    cursor:pointer;
+
+
+    font-weight:600;
+
+
+    transition:.2s;
+
+
+}
+
+
+
+
+
+
+.sidebar-footer button:hover {
+
+
+    background:#334155;
+
+
+    color:white;
+
+
+}
+
+
+
+
+
+
+
+
+/* ==========================================
+   Mobile
+========================================== */
+
+
+@media(max-width:900px){
+
+
+
+    .sidebar {
+
+
+        width:100%;
+
+
+        min-height:auto;
+
+
+        flex-direction:row;
+
+
+        align-items:center;
+
+
+        overflow-x:auto;
+
+
+        padding:15px;
+
+
+        gap:15px;
+
+
+    }
+
+
+
+
+
+    .sidebar-logo {
+
+
+        display:none;
+
+
+    }
+
+
+
+
+
+    .sidebar-nav {
+
+
+        flex-direction:row;
+
+
+        gap:8px;
+
+
+    }
+
+
+
+
+
+    .sidebar-link {
+
+
+        white-space:nowrap;
+
+
+        padding:12px 15px;
+
+
+    }
+
+
+
+
+
+    .sidebar-link.active::before {
+
+
+        display:none;
+
+
+    }
+
+
+
+
+
+    .sidebar-footer {
+
+
+        display:none;
+
+
+    }
+
+
+}

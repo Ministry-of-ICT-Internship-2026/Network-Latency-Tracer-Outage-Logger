@@ -1,5 +1,7 @@
-streamlit
+fastapi
+uvicorn
+icmplib
 pandas
 plotly
-ping3
 matplotlib
+python-multipart
