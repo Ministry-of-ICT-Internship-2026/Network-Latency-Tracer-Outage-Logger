@@ -1,4 +1,3 @@
-import asyncio
 import logging
 
 from monitoring.monitor import NetworkMonitor
@@ -21,9 +20,7 @@ db = DatabaseManager()
 
 def handle_result(result, status):
 
-    # save every ping
     db.save_ping(result)
-
 
     logging.info(
         "Saved latency: %s -> %s ms",
@@ -33,7 +30,7 @@ def handle_result(result, status):
 
 
 
-async def main():
+async def start_monitor():
 
     config.targets = load_targets_from_database()
 
@@ -45,9 +42,3 @@ async def main():
 
 
     await monitor.start()
-
-
-
-if __name__ == "__main__":
-
-    asyncio.run(main())
