@@ -152,7 +152,7 @@ NetworkLatencyTracer/
 # Installation
 
 ## Backend Setup
-
+Open terminal
 Navigate to the backend folder:
 
 ```bash
@@ -180,7 +180,7 @@ http://127.0.0.1:8000
 ---
 
 ## Frontend Setup
-
+Open another terminal
 Navigate to the frontend folder:
 
 ```bash
