@@ -218,6 +218,85 @@ class MonitoringAnalytics:
 
         return cursor.fetchall()
 
+    def get_network_summary(self) -> dict:
+        """
+        Returns only the network-wide summary.
+        """
+
+        report = self.build_full_report()
+
+        return {
+            "generated_at": report["generated_at"],
+            "period": report["period"],
+            "summary": report["summary"]
+        }
+
+
+    def get_latency_analysis(self) -> dict:
+        """
+        Returns latency-focused information.
+        """
+
+        report = self.build_full_report()
+
+        latency_hosts = {}
+
+        for host, data in report["hosts"].items():
+
+            latency_hosts[host] = {
+                "name": data["name"],
+                "avg_latency_ms": data["avg_latency_ms"],
+                "min_latency_ms": data["min_latency_ms"],
+                "max_latency_ms": data["max_latency_ms"],
+                "p95_latency_ms": data["p95_latency_ms"],
+                "stdev_latency_ms": data["stdev_latency_ms"],
+                "jitter_ms": data["avg_jitter_ms"],
+                "latency_series": data["latency_series"]
+            }
+
+
+        return {
+            "generated_at": report["generated_at"],
+            "hosts": latency_hosts
+        }
+
+
+    def get_outage_analysis(self) -> dict:
+        """
+        Returns outage-focused information.
+        """
+
+        report = self.build_full_report()
+
+
+        return {
+            "generated_at": report["generated_at"],
+            "total_outages": report["summary"]["total_outages"],
+            "total_downtime_seconds": report["summary"]["total_downtime_seconds"],
+            "outages": report["outage_log"]
+        }
+
+
+    def get_host_report(self, host: str) -> dict:
+        """
+        Returns a single host reliability report.
+        """
+
+        report = self.build_full_report()
+
+
+        if host not in report["hosts"]:
+            raise ValueError(
+                f"Host {host} not found"
+            )
+
+
+        return {
+            "generated_at": report["generated_at"],
+            "host": report["hosts"][host]
+        }
+
+
     # ------------------------------------------------------------------
     # Internals
     # ------------------------------------------------------------------

@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+icmplib
+pandas
+plotly
+matplotlib
+python-multipart
+reportlab

@@ -1,8 +1,6 @@
+import os
 from io import BytesIO
 from datetime import datetime, timezone
-from tempfile import NamedTemporaryFile
-
-import matplotlib.pyplot as plt
 
 
 from reportlab.platypus import (
@@ -18,188 +16,112 @@ from reportlab.platypus import (
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.enums import TA_CENTER
+from reportlab.lib.colors import HexColor
+
+
+from reporting.charts import (
+    create_latency_chart,
+    create_loss_chart
+)
+
 
 
 
 # ==================================================
-# CHART GENERATORS
+# FORMATTING HELPERS
 # ==================================================
 
-def create_latency_chart(host):
+def format_duration(seconds):
+    """174820.8 -> '2d 0h 33m'. Falls back to the raw value if it
+    isn't a plain number (e.g. already a string, or None)."""
 
-    series = host.get(
-        "latency_series",
-        []
+    try:
+
+        seconds = int(float(seconds))
+
+    except (TypeError, ValueError):
+
+        return seconds
+
+
+    days, remainder = divmod(seconds, 86400)
+
+    hours, remainder = divmod(remainder, 3600)
+
+    minutes, _ = divmod(remainder, 60)
+
+
+    parts = []
+
+
+    if days:
+
+        parts.append(f"{days}d")
+
+
+    if hours or days:
+
+        parts.append(f"{hours}h")
+
+
+    parts.append(f"{minutes}m")
+
+
+    return " ".join(parts)
+
+
+
+def format_timestamp(raw):
+    """ISO datetime string -> '24 Jul 2026 06:04'. Falls back to the
+    raw value if it doesn't parse."""
+
+    try:
+
+        dt = datetime.fromisoformat(raw)
+
+        return dt.strftime("%d %b %Y %H:%M")
+
+    except (TypeError, ValueError):
+
+        return raw
+
+
+
+# Grade -> accent hex color. Unrecognized grades fall back to slate.
+GRADE_COLORS = {
+
+    "Excellent": "#15803d",
+
+    "Good": "#2563eb",
+
+    "Fair": "#b45309",
+
+    "Poor": "#c2410c",
+
+    "Critical": "#b91c1c"
+
+}
+
+
+STATUS_COLORS = {
+
+    "ONLINE": "#15803d",
+
+    "DOWN": "#b91c1c"
+
+}
+
+
+
+def colored_label(text, hex_color):
+
+    return Paragraph(
+
+        f'<font color="{hex_color}"><b>{text}</b></font>',
+
+        getSampleStyleSheet()["Normal"]
+
     )
-
-
-    if not series:
-        return None
-
-
-
-    times = [
-        item.get(
-            "timestamp",
-            item.get("t", "")
-        )
-        for item in series
-    ]
-
-
-    values = [
-        item.get(
-            "latency_ms",
-            item.get("avg_ms", 0)
-        )
-        for item in series
-    ]
-
-
-
-    plt.figure(
-        figsize=(7,3)
-    )
-
-
-    plt.plot(
-        times,
-        values
-    )
-
-
-    plt.title(
-        "Latency Trend"
-    )
-
-
-    plt.xlabel(
-        "Time"
-    )
-
-
-    plt.ylabel(
-        "Latency (ms)"
-    )
-
-
-    plt.xticks(
-        rotation=45
-    )
-
-
-    plt.tight_layout()
-
-
-
-    temp = NamedTemporaryFile(
-        suffix=".png",
-        delete=False
-    )
-
-
-    plt.savefig(
-        temp.name,
-        dpi=300,
-        bbox_inches="tight"
-    )
-
-
-    plt.close()
-
-
-    return temp.name
-
-
-
-
-
-def create_loss_chart(host):
-
-    series = host.get(
-        "loss_series",
-        []
-    )
-
-
-    if not series:
-        return None
-
-
-
-    times = [
-        item.get(
-            "timestamp",
-            item.get("t", "")
-        )
-        for item in series
-    ]
-
-
-
-    values = [
-        item.get(
-            "loss_pct",
-            0
-        )
-        for item in series
-    ]
-
-
-
-    plt.figure(
-        figsize=(7,3)
-    )
-
-
-    plt.plot(
-        times,
-        values
-    )
-
-
-    plt.title(
-        "Packet Loss"
-    )
-
-
-    plt.xlabel(
-        "Time"
-    )
-
-
-    plt.ylabel(
-        "Loss (%)"
-    )
-
-
-    plt.xticks(
-        rotation=45
-    )
-
-
-    plt.tight_layout()
-
-
-
-    temp = NamedTemporaryFile(
-        suffix=".png",
-        delete=False
-    )
-
-
-    plt.savefig(
-        temp.name,
-        dpi=300,
-        bbox_inches="tight"
-    )
-
-
-    plt.close()
-
-
-    return temp.name
-
 
 
 
@@ -212,12 +134,14 @@ def add_page_number(canvas, doc):
 
     canvas.saveState()
 
-
     canvas.setFont(
         "Helvetica",
         9
     )
 
+    canvas.setFillColor(
+        HexColor("#94a3b8")
+    )
 
     canvas.drawString(
         40,
@@ -225,9 +149,277 @@ def add_page_number(canvas, doc):
         f"Network Monitor Report - Page {doc.page}"
     )
 
-
     canvas.restoreState()
 
+
+
+
+# ==================================================
+# TABLE STYLE
+# ==================================================
+
+def make_table(data, col_widths=None):
+
+    table = Table(
+        data,
+        repeatRows=1,
+        hAlign="LEFT",
+        colWidths=col_widths
+    )
+
+
+    table.setStyle(
+
+        TableStyle(
+
+            [
+
+                (
+                    "BACKGROUND",
+                    (0,0),
+                    (-1,0),
+                    HexColor("#1e293b")
+                ),
+
+                (
+                    "TEXTCOLOR",
+                    (0,0),
+                    (-1,0),
+                    HexColor("#ffffff")
+                ),
+
+                (
+                    "FONTNAME",
+                    (0,0),
+                    (-1,0),
+                    "Helvetica-Bold"
+                ),
+
+                (
+                    "FONTSIZE",
+                    (0,0),
+                    (-1,0),
+                    9
+                ),
+
+                (
+                    "ALIGN",
+                    (0,0),
+                    (-1,-1),
+                    "CENTER"
+                ),
+
+                (
+                    "VALIGN",
+                    (0,0),
+                    (-1,-1),
+                    "MIDDLE"
+                ),
+
+                (
+                    "LINEBELOW",
+                    (0,0),
+                    (-1,0),
+                    1,
+                    HexColor("#1e293b")
+                ),
+
+                (
+                    "LINEBELOW",
+                    (0,1),
+                    (-1,-1),
+                    0.5,
+                    HexColor("#e2e8f0")
+                ),
+
+                (
+                    "ROWBACKGROUNDS",
+                    (0,1),
+                    (-1,-1),
+                    [
+                        HexColor("#ffffff"),
+                        HexColor("#f8fafc")
+                    ]
+                ),
+
+                (
+                    "FONTSIZE",
+                    (0,1),
+                    (-1,-1),
+                    9
+                ),
+
+                (
+                    "TEXTCOLOR",
+                    (0,1),
+                    (-1,-1),
+                    HexColor("#334155")
+                ),
+
+                (
+                    "TOPPADDING",
+                    (0,0),
+                    (-1,-1),
+                    9
+                ),
+
+                (
+                    "BOTTOMPADDING",
+                    (0,0),
+                    (-1,-1),
+                    9
+                )
+
+            ]
+
+        )
+
+    )
+
+
+    return table
+
+
+
+
+# ==================================================
+# KPI CARDS
+# ==================================================
+
+def make_kpi_cards(items, styles):
+
+    cards = []
+
+
+    for title, value, accent_hex in items:
+
+
+        title_para = Paragraph(
+
+            f'<font color="#64748b">{title}</font>',
+
+            styles["Normal"]
+
+        )
+
+
+        value_para = Paragraph(
+
+            f'<font color="{accent_hex}"><b>{value}</b></font>',
+
+            styles["Heading2"]
+
+        )
+
+
+        card = Table(
+
+            [
+                [title_para],
+                [value_para]
+            ],
+
+            colWidths=[120],
+
+            rowHeights=[
+                22,
+                34
+            ]
+
+        )
+
+
+        card.setStyle(
+
+            TableStyle(
+
+                [
+
+                    (
+                        "BOX",
+                        (0,0),
+                        (-1,-1),
+                        0.7,
+                        HexColor("#e2e8f0")
+                    ),
+
+                    (
+                        "LINEBELOW",
+                        (0,0),
+                        (-1,0),
+                        2,
+                        HexColor(accent_hex)
+                    ),
+
+                    (
+                        "ALIGN",
+                        (0,0),
+                        (-1,-1),
+                        "CENTER"
+                    ),
+
+                    (
+                        "VALIGN",
+                        (0,0),
+                        (-1,-1),
+                        "MIDDLE"
+                    ),
+
+                    (
+                        "BACKGROUND",
+                        (0,0),
+                        (-1,-1),
+                        HexColor("#f8fafc")
+                    )
+
+                ]
+
+            )
+
+        )
+
+
+        cards.append(card)
+
+
+    row1 = cards[:3]
+
+    row2 = cards[3:]
+
+    while len(row2) < len(row1):
+
+        row2.append("")
+
+
+    outer = Table(
+
+        [
+            row1,
+            row2
+        ],
+
+        hAlign="LEFT"
+
+    )
+
+
+    outer.setStyle(
+
+        TableStyle(
+
+            [
+                ("TOPPADDING", (0,0), (-1,-1), 6),
+                ("BOTTOMPADDING", (0,0), (-1,-1), 6),
+                ("LEFTPADDING", (0,0), (-1,-1), 6),
+                ("RIGHTPADDING", (0,0), (-1,-1), 6)
+            ]
+
+        )
+
+    )
+
+
+    return outer
 
 
 
@@ -264,24 +456,42 @@ def generate_pdf(report):
     styles = getSampleStyleSheet()
 
 
-
     styles["Title"].alignment = TA_CENTER
+
+    styles["Title"].textColor = HexColor("#0f172a")
+
+    styles["Heading2"].textColor = HexColor("#0f172a")
+
+    styles["Heading3"].textColor = HexColor("#1e293b")
 
 
 
     content = []
 
 
+    temp_chart_files = []
 
-    # ------------------------------------------------
-    # TITLE
-    # ------------------------------------------------
+
+
+    generated = datetime.now(
+        timezone.utc
+    ).strftime(
+        "%d %B %Y %H:%M UTC"
+    )
+
+
+
+
+    # ==================================================
+    # COVER
+    # ==================================================
+
 
     content.append(
 
         Paragraph(
 
-            "Network Reliability Report",
+            "Network Latency Tracer",
 
             styles["Title"]
 
@@ -290,35 +500,29 @@ def generate_pdf(report):
     )
 
 
-
     content.append(
-
-        Spacer(
-            1,
-            15
-        )
-
+        Spacer(1,16)
     )
-
-
-
-    generated = datetime.now(
-
-        timezone.utc
-
-    ).strftime(
-
-        "%d %B %Y %H:%M UTC"
-
-    )
-
 
 
     content.append(
 
         Paragraph(
 
-            f"Generated: {generated}",
+            '<font color="#64748b">Full Reliability Report</font>',
+
+            styles["Heading2"]
+
+        )
+
+    )
+
+
+    content.append(
+
+        Paragraph(
+
+            f'<font color="#94a3b8">Generated: {generated}</font>',
 
             styles["Normal"]
 
@@ -327,29 +531,24 @@ def generate_pdf(report):
     )
 
 
-
     content.append(
-
-        Spacer(
-            1,
-            30
-        )
-
+        Spacer(1,40)
     )
 
 
 
 
-
-    summary = report["summary"]
-
-
-
-
-
-    # ------------------------------------------------
+    # ==================================================
     # SUMMARY
-    # ------------------------------------------------
+    # ==================================================
+
+
+    summary = report.get(
+        "summary",
+        {}
+    )
+
+
 
     content.append(
 
@@ -364,158 +563,83 @@ def generate_pdf(report):
     )
 
 
+    content.append(
+        Spacer(1,10)
+    )
 
-    summary_table = Table(
+
+
+    accent_blue = "#2563eb"
+
+    accent_green = "#15803d"
+
+    accent_amber = "#b45309"
+
+    accent_red = "#b91c1c"
+
+    accent_slate = "#334155"
+
+
+
+    cards = make_kpi_cards(
 
         [
 
-            ["Metric","Value"],
+            (
+                "HOSTS",
+                summary.get("hosts_monitored", 0),
+                accent_slate
+            ),
 
+            (
+                "UPTIME",
+                f'{summary.get("fleet_uptime_pct")}%',
+                accent_green
+            ),
 
-            [
-                "Hosts monitored",
-                summary["hosts_monitored"]
-            ],
+            (
+                "AVG LATENCY",
+                f'{summary.get("fleet_avg_latency_ms")} ms',
+                accent_blue
+            ),
 
+            (
+                "OUTAGES",
+                summary.get("total_outages", 0),
+                accent_amber
+            ),
 
-            [
-                "Fleet uptime",
-                f'{summary["fleet_uptime_pct"]}%'
-            ],
-
-
-            [
-                "Average latency",
-                f'{summary["fleet_avg_latency_ms"]} ms'
-            ],
-
-
-            [
-                "Total outages",
-                summary["total_outages"]
-            ],
-
-
-            [
-                "Downtime",
-                summary["total_downtime_human"]
-            ]
+            (
+                "DOWNTIME",
+                summary.get("total_downtime_human", "0s"),
+                accent_red
+            )
 
         ],
 
-        colWidths=[220,150]
+        styles
 
     )
 
 
-
-    summary_table.setStyle(
-
-        TableStyle(
-
-            [
-
-                (
-                    "GRID",
-                    (0,0),
-                    (-1,-1),
-                    0.5,
-                    None
-                )
-
-            ]
-
-        )
-
-    )
-
+    content.append(cards)
 
 
     content.append(
-
-        summary_table
-
+        Spacer(1,20)
     )
 
 
 
 
-    # ------------------------------------------------
-    # HEALTH CHECK
-    # ------------------------------------------------
+    # ==================================================
+    # HOST RELIABILITY
+    # ==================================================
 
 
     content.append(
-
-        Spacer(
-            1,
-            20
-        )
-
-    )
-
-
-
-    content.append(
-
-        Paragraph(
-
-            "Network Health Assessment",
-
-            styles["Heading2"]
-
-        )
-
-    )
-
-
-
-    health = "GOOD"
-
-
-
-    if summary["fleet_uptime_pct"] < 95:
-
-        health = "WARNING"
-
-
-
-    if summary["total_outages"] > 5:
-
-        health = "CRITICAL"
-
-
-
-
-    content.append(
-
-        Paragraph(
-
-            f"Overall Network Health: {health}",
-
-            styles["Normal"]
-
-        )
-
-    )
-
-
-
-
-
-    content.append(
-
         PageBreak()
-
     )
-
-
-
-
-
-    # ------------------------------------------------
-    # HOST TABLE
-    # ------------------------------------------------
 
 
     content.append(
@@ -531,124 +655,208 @@ def generate_pdf(report):
     )
 
 
+    content.append(
+        Spacer(1,10)
+    )
 
 
-    host_data = [
+
+    rows = [
 
         [
-
             "Host",
             "Status",
             "Uptime",
             "Latency",
             "Grade",
             "Outages"
-
         ]
 
     ]
 
 
 
+    for ip, host in report.get(
+        "hosts",
+        {}
+    ).items():
 
 
-    for ip,host in report["hosts"].items():
-
-
-        host_data.append(
-
-            [
-
-                host["name"],
-
-
-                "DOWN"
-                if host["currently_down"]
-                else "ONLINE",
-
-
-                f'{host["uptime_pct"]}%',
-
-
-                (
-                    f'{host["avg_latency_ms"]} ms'
-                    if host["avg_latency_ms"]
-                    else "N/A"
-                ),
-
-
-                host["reliability_grade"],
-
-
-                host["outage_count"]
-
-            ]
-
+        status_text = (
+            "DOWN"
+            if host.get("currently_down")
+            else "ONLINE"
         )
 
 
+        grade_text = host.get(
+            "reliability_grade",
+            ""
+        )
 
 
-
-    host_table = Table(
-
-        host_data,
-
-        repeatRows=1
-
-    )
-
+        status_cell = colored_label(
+            status_text,
+            STATUS_COLORS.get(
+                status_text,
+                "#334155"
+            )
+        )
 
 
-    host_table.setStyle(
+        grade_cell = colored_label(
+            grade_text,
+            GRADE_COLORS.get(
+                grade_text,
+                "#334155"
+            )
+        )
 
-        TableStyle(
+
+        rows.append(
 
             [
 
-                (
+                host.get(
+                    "name",
+                    ip
+                ),
 
-                    "GRID",
+                status_cell,
 
-                    (0,0),
+                f'{host.get("uptime_pct")}%',
 
-                    (-1,-1),
+                host.get(
+                    "avg_latency_ms"
+                ),
 
-                    0.5,
+                grade_cell,
 
-                    None
-
+                host.get(
+                    "outage_count"
                 )
 
             ]
 
         )
 
-    )
-
-
 
     content.append(
-
-        host_table
-
+        make_table(rows)
     )
 
 
 
 
-
-
-
-    # ------------------------------------------------
-    # CHARTS
-    # ------------------------------------------------
+    # ==================================================
+    # OUTAGE HISTORY
+    # ==================================================
 
 
     content.append(
-
         PageBreak()
+    )
 
+
+    content.append(
+
+        Paragraph(
+
+            "Outage History",
+
+            styles["Heading2"]
+
+        )
+
+    )
+
+
+    content.append(
+        Spacer(1,10)
+    )
+
+
+    outage_rows = [
+
+        [
+            "Host",
+            "Start",
+            "Duration"
+        ]
+
+    ]
+
+
+    outage_log = report.get(
+        "outage_log",
+        []
+    )
+
+
+    if outage_log:
+
+        for outage in outage_log:
+
+
+            outage_rows.append(
+
+                [
+
+                    outage.get(
+                        "host"
+                    ),
+
+                    format_timestamp(
+                        outage.get("start_time")
+                    ),
+
+                    format_duration(
+                        outage.get("duration_seconds")
+                    )
+
+                ]
+
+            )
+
+
+        content.append(
+
+            make_table(
+
+                outage_rows,
+
+                col_widths=[160, 180, 100]
+
+            )
+
+        )
+
+
+    else:
+
+
+        content.append(
+
+            Paragraph(
+
+                '<font color="#64748b">No outages recorded.</font>',
+
+                styles["Normal"]
+
+            )
+
+        )
+
+
+
+
+    # ==================================================
+    # CHARTS
+    # ==================================================
+
+
+    content.append(
+        PageBreak()
     )
 
 
@@ -665,16 +873,26 @@ def generate_pdf(report):
     )
 
 
+    content.append(
+        Spacer(1,10)
+    )
 
 
-    for ip,host in report["hosts"].items():
+
+    for ip, host in report.get(
+        "hosts",
+        {}
+    ).items():
 
 
         content.append(
 
             Paragraph(
 
-                host["name"],
+                host.get(
+                    "name",
+                    ip
+                ),
 
                 styles["Heading3"]
 
@@ -683,29 +901,28 @@ def generate_pdf(report):
         )
 
 
+        content.append(
+            Spacer(1,6)
+        )
+
+
 
         latency = create_latency_chart(host)
 
 
-
         if latency:
 
+            temp_chart_files.append(latency)
 
             content.append(
 
                 Image(
-
                     latency,
-
                     width=400,
-
                     height=180
-
                 )
 
             )
-
-
 
 
 
@@ -715,200 +932,47 @@ def generate_pdf(report):
 
         if loss:
 
+            temp_chart_files.append(loss)
 
             content.append(
 
                 Image(
-
                     loss,
-
                     width=400,
-
                     height=180
-
                 )
 
             )
-
 
 
         content.append(
-
-            Spacer(
-                1,
-                20
-            )
-
+            Spacer(1,14)
         )
 
 
 
 
-
-
-
-    # ------------------------------------------------
-    # OUTAGES
-    # ------------------------------------------------
+    # ==================================================
+    # FOOTER
+    # ==================================================
 
 
     content.append(
-
-        PageBreak()
-
+        Spacer(1,30)
     )
-
 
 
     content.append(
 
         Paragraph(
 
-            "Outage History",
-
-            styles["Heading2"]
-
-        )
-
-    )
-
-
-
-    outage_rows = [
-
-        [
-
-            "Host",
-
-            "Start",
-
-            "Duration"
-
-        ]
-
-    ]
-
-
-
-
-    for outage in report.get(
-        "outage_log",
-        []
-    ):
-
-
-        outage_rows.append(
-
-            [
-
-                outage.get(
-                    "host",
-                    "Unknown"
-                ),
-
-
-                outage["start_time"],
-
-
-                f'{outage["duration_seconds"]} seconds'
-
-            ]
-
-        )
-
-
-
-
-    if len(outage_rows) == 1:
-
-
-        outage_rows.append(
-
-            [
-
-                "No outages recorded",
-
-                "",
-
-                ""
-
-            ]
-
-        )
-
-
-
-
-
-    outage_table = Table(
-
-        outage_rows
-
-    )
-
-
-
-    outage_table.setStyle(
-
-        TableStyle(
-
-            [
-
-                (
-
-                    "GRID",
-
-                    (0,0),
-
-                    (-1,-1),
-
-                    0.5,
-
-                    None
-
-                )
-
-            ]
-
-        )
-
-    )
-
-
-
-    content.append(
-
-        outage_table
-
-    )
-
-
-
-
-
-    content.append(
-
-        Spacer(
-            1,
-            30
-        )
-
-    )
-
-
-
-    content.append(
-
-        Paragraph(
-
-            "Generated by Network Monitoring System",
+            '<font color="#94a3b8">Generated by Network Monitoring System</font>',
 
             styles["Normal"]
 
         )
 
     )
-
 
 
 
@@ -923,9 +987,19 @@ def generate_pdf(report):
     )
 
 
+    for path in temp_chart_files:
+
+        try:
+
+            os.remove(path)
+
+        except OSError:
+
+            pass
+
+
 
     buffer.seek(0)
-
 
 
     return buffer

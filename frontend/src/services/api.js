@@ -81,7 +81,7 @@ export function getFullAnalytics(){
 export function getReport(){
 
     return api
-        .get("/reports")
+        .get("/reports/")
         .then(res => res.data);
 
 }

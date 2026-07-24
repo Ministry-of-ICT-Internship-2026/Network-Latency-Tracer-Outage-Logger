@@ -30,7 +30,7 @@ export default function useReports(){
 
                 const response =
                     await api.get(
-                        "/reports/"
+                        "/reports"
                     );
 
 

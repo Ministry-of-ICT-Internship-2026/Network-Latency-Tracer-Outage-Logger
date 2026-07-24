@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 import useReports from "../hooks/useReports";
 
 import ReportButton from "../components/reports/ReportButton";
@@ -16,11 +18,17 @@ export default function Reports() {
 
 
 
+    const [format, setFormat] =
+        useState("pdf");
+
+
+
+
     if (loading) {
 
         return (
             <h2>
-                Generating report...
+                Loading reports...
             </h2>
         );
 
@@ -52,83 +60,70 @@ export default function Reports() {
 
 
             <p>
-                Generate and download network monitoring reports.
+                Generate the full network monitoring report.
             </p>
 
 
 
 
 
-            {/* Export Section */}
+            {/* Report Generator */}
 
             <div className="report-section">
 
 
                 <h2>
-                    Export Reports
+                    Generate Report
                 </h2>
 
 
 
-                <div className="report-grid">
+                <div className="report-generator-card">
 
 
 
-                    <div className="report-card">
-
-
-                        <h3>
-                            CSV Report
-                        </h3>
-
-
-                        <p>
-                            Export monitoring data
-                        </p>
+                    <label>
+                        Output Format
+                    </label>
 
 
 
-                        <ReportButton
+                    <select
 
-                            type="csv"
+                        value={format}
 
-                            label="Download CSV"
+                        onChange={
+                            e =>
+                            setFormat(
+                                e.target.value
+                            )
+                        }
 
-                        />
+                    >
 
-
-                    </div>
-
-
-
-
-
-
-                    <div className="report-card">
-
-
-                        <h3>
-                            PDF Report
-                        </h3>
+                        <option value="pdf">
+                            PDF
+                        </option>
 
 
-                        <p>
-                            Printable network report
-                        </p>
+                        <option value="csv">
+                            CSV
+                        </option>
+
+
+                    </select>
 
 
 
-                        <ReportButton
-
-                            type="pdf"
-
-                            label="Download PDF"
-
-                        />
 
 
-                    </div>
+                    <ReportButton
 
+                        format={format}
+
+                        label="Generate Report"
+
+                    />
 
 
 
@@ -143,7 +138,8 @@ export default function Reports() {
 
 
 
-            {/* Summary Section */}
+
+            {/* Summary */}
 
             {
                 report && (
@@ -152,7 +148,7 @@ export default function Reports() {
 
 
                         <h2>
-                            Latest Report Summary
+                            Latest Network Summary
                         </h2>
 
 
@@ -168,7 +164,9 @@ export default function Reports() {
                                 </h3>
 
                                 <p>
-                                    {report.summary.hosts_monitored}
+                                    {
+                                    report.summary.hosts_monitored
+                                    }
                                 </p>
 
                             </div>
@@ -184,7 +182,9 @@ export default function Reports() {
                                 </h3>
 
                                 <p>
-                                    {report.summary.fleet_uptime_pct}%
+                                    {
+                                    report.summary.fleet_uptime_pct
+                                    }%
                                 </p>
 
                             </div>
@@ -201,8 +201,9 @@ export default function Reports() {
                                 </h3>
 
                                 <p>
-                                    {report.summary.fleet_avg_latency_ms}
-                                    ms
+                                    {
+                                    report.summary.fleet_avg_latency_ms
+                                    } ms
                                 </p>
 
                             </div>
@@ -219,11 +220,12 @@ export default function Reports() {
                                 </h3>
 
                                 <p>
-                                    {report.summary.total_outages}
+                                    {
+                                    report.summary.total_outages
+                                    }
                                 </p>
 
                             </div>
-
 
 
 
@@ -236,7 +238,9 @@ export default function Reports() {
                                 </h3>
 
                                 <p>
-                                    {report.summary.total_downtime_human}
+                                    {
+                                    report.summary.total_downtime_human
+                                    }
                                 </p>
 
                             </div>
@@ -249,6 +253,7 @@ export default function Reports() {
                     </div>
 
                 )
+
             }
 
 

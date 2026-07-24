@@ -2,7 +2,7 @@ import api from "../../services/api";
 
 
 export default function ReportButton({
-    type,
+    format,
     label
 }) {
 
@@ -13,9 +13,19 @@ export default function ReportButton({
         try {
 
 
+            const params = new URLSearchParams();
+
+
+            params.append(
+                "output_format",
+                format
+            );
+
+
+
             const response = await api.get(
 
-                `/reports/${type}`,
+                `/reports/generate?${params.toString()}`,
 
                 {
                     responseType: "blob"
@@ -26,7 +36,7 @@ export default function ReportButton({
 
 
             const contentType =
-                type === "pdf"
+                format === "pdf"
                 ?
                 "application/pdf"
                 :
@@ -36,7 +46,9 @@ export default function ReportButton({
 
             const blob = new Blob(
 
-                [response.data],
+                [
+                    response.data
+                ],
 
                 {
                     type: contentType
@@ -60,13 +72,8 @@ export default function ReportButton({
 
 
 
-            link.setAttribute(
-
-                "download",
-
-                `network_report.${type}`
-
-            );
+            link.download =
+                `network_report.${format}`;
 
 
 
@@ -87,6 +94,7 @@ export default function ReportButton({
 
 
         }
+
         catch(error){
 
 
@@ -97,7 +105,6 @@ export default function ReportButton({
 
 
         }
-
 
     }
 
